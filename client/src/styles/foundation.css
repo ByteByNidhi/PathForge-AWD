@@ -1,0 +1,143 @@
+.foundation {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) 1fr;
+}
+
+.foundation__brand {
+  background: var(--surface-sidebar);
+  color: var(--color-text-on-dark);
+  padding: var(--space-10) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-10);
+}
+
+.foundation__mark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.foundation__logo {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+}
+
+.foundation__name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+.foundation__headline {
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  color: var(--color-text-on-dark);
+  max-width: 14ch;
+}
+
+.foundation__lede {
+  margin-top: var(--space-4);
+  color: var(--color-text-on-dark-muted);
+  max-width: 28ch;
+}
+
+.foundation__phase {
+  font-size: var(--text-sm);
+  color: var(--color-brand-sage-soft);
+}
+
+.foundation__content {
+  padding: var(--space-10) var(--space-8);
+  display: flex;
+  align-items: center;
+}
+
+.foundation__panel {
+  width: 100%;
+  max-width: 36rem;
+  padding: var(--space-8);
+}
+
+.foundation__title {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-2xl);
+}
+
+.foundation__status {
+  margin-top: var(--space-6);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-warm);
+}
+
+.foundation__status-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.foundation__status--loading .foundation__status-icon {
+  color: var(--color-info);
+  animation: pf-spin 0.9s linear infinite;
+}
+
+.foundation__status--success .foundation__status-icon {
+  color: var(--color-success);
+}
+
+.foundation__status--error .foundation__status-icon {
+  color: var(--color-error);
+}
+
+.foundation__status-label {
+  font-weight: var(--weight-semibold);
+}
+
+.foundation__status-message {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.foundation__meta {
+  margin-top: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+@keyframes pf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 800px) {
+  .foundation {
+    grid-template-columns: 1fr;
+  }
+
+  .foundation__brand {
+    min-height: auto;
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .foundation__content {
+    padding: var(--space-6);
+    align-items: stretch;
+  }
+
+  .foundation__panel {
+    padding: var(--space-6);
+  }
+}
