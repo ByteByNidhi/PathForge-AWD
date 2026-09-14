@@ -40,6 +40,28 @@ cd server
 npm start
 ```
 
+## Environment
+
+Copy `server/.env.example` to `server/.env` and `client/.env.example` to `client/.env`. Never commit `.env` files.
+
+Required server values for Sprint 1:
+
+- `PORT`
+- `MONGODB_URI` — MongoDB Atlas connection string (never expose this to React)
+- `JWT_SECRET`
+- `CLIENT_ORIGIN`
+
+## Seed data
+
+The Atlas database starts empty. Seed published learning paths and the skill catalogue (no fake users or XP):
+
+```bash
+cd server
+npm run seed
+```
+
+The seed is idempotent. Re-running it updates the same path and skill records instead of duplicating them.
+
 ## Health endpoint
 
 `GET /api/health`
@@ -47,12 +69,7 @@ npm start
 ```json
 {
   "success": true,
-  "message": "PathForge API is running"
+  "message": "PathForge API is running",
+  "database": "connected"
 }
 ```
-
-## Environment
-
-Copy `server/.env.example` to `server/.env` and `client/.env.example` to `client/.env`. Never commit `.env` files.
-
-Phase 0 stops at this foundation. Authentication, models, and product features are added in later phases.

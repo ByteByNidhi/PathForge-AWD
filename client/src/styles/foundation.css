@@ -128,7 +128,6 @@
   }
 
   .foundation__brand {
-    min-height: auto;
     padding: var(--space-8) var(--space-6);
   }
 

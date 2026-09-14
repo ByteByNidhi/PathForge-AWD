@@ -1,0 +1,89 @@
+.onboarding {
+  max-width: 44rem;
+}
+
+.onboarding__steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.onboarding__step {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-paper);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.onboarding__step.is-active {
+  border-color: var(--color-brand-emerald);
+  color: var(--color-text-primary);
+  background: var(--color-surface-warm);
+}
+
+.onboarding__panel {
+  padding: var(--space-8);
+}
+
+.onboarding__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.profile-form,
+.skills-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.skill-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-paper);
+}
+
+.skill-pill button {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+@media (max-width: 800px) {
+  .onboarding__steps,
+  .page-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding__panel {
+    padding: var(--space-5);
+  }
+}
