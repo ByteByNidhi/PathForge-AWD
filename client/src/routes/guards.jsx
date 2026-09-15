@@ -1,7 +1,8 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import LoadingState from '../components/ui/LoadingState.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
-import { getPostAuthPath } from '../utils/auth.js'
+import { getPostAuthPath, isAdmin } from '../utils/auth.js'
+import { isOrganizationUser } from '../utils/organization.js'
 import { PATHS } from './paths.js'
 
 export function GuestRoute() {
@@ -47,7 +48,37 @@ export function ProtectedRoute({ requireOnboarding = true }) {
   }
 
   if (!needsOnboarding && onOnboarding) {
-    return <Navigate to={PATHS.DASHBOARD} replace />
+    return <Navigate to={getPostAuthPath(user)} replace />
+  }
+
+  return <Outlet />
+}
+
+export function StudentAppRoute() {
+  const { user } = useAuth()
+
+  if (isOrganizationUser(user)) {
+    return <Navigate to={PATHS.ORGANIZATION} replace />
+  }
+
+  return <Outlet />
+}
+
+export function OrganizationRoute() {
+  const { user } = useAuth()
+
+  if (!isOrganizationUser(user)) {
+    return <Navigate to={getPostAuthPath(user)} replace />
+  }
+
+  return <Outlet />
+}
+
+export function AdminRoute() {
+  const { user } = useAuth()
+
+  if (!isAdmin(user)) {
+    return <Navigate to={getPostAuthPath(user)} replace />
   }
 
   return <Outlet />

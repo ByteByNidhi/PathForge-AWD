@@ -10,6 +10,7 @@ const {
   validatePassword,
   validatePasswordConfirmation,
 } = require('../utils/validators');
+const { serializeUserWithOrganization } = require('../services/organizationAccess');
 
 function collectErrors(pairs) {
   return pairs
@@ -61,7 +62,7 @@ const register = asyncHandler(async (req, res) => {
     success: true,
     message: 'Registration successful',
     token,
-    user: user.toSafeObject(),
+    user: await serializeUserWithOrganization(user),
   });
 });
 
@@ -86,7 +87,7 @@ const login = asyncHandler(async (req, res) => {
     success: true,
     message: 'Login successful',
     token,
-    user: user.toSafeObject(),
+    user: await serializeUserWithOrganization(user),
   });
 });
 
@@ -97,7 +98,7 @@ const me = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    user: user.toSafeObject(),
+    user: await serializeUserWithOrganization(user),
   });
 });
 

@@ -6,6 +6,9 @@ const assert = require('node:assert/strict');
 const LearningPath = require('../models/LearningPath');
 const RoadmapStep = require('../models/RoadmapStep');
 const Achievement = require('../models/Achievement');
+const Opportunity = require('../models/Opportunity');
+const Organization = require('../models/Organization');
+const OrganizationUser = require('../models/OrganizationUser');
 const { seedDatabase } = require('../scripts/seedLib');
 const { startTestDb, stopTestDb, clearTestDb } = require('./helpers');
 
@@ -37,4 +40,16 @@ test('WFS roadmap seed is idempotent and loads 7 paths with 20 steps each', asyn
   assert.equal(step.title, 'HTML Fundamentals');
   assert.equal(step.xpReward, 50);
   assert.equal(step.skills[0].name, 'HTML');
+
+  assert.equal(first.opportunityCount, 10);
+  assert.equal(second.opportunityCount, 10);
+  assert.equal(await Opportunity.countDocuments(), 10);
+  assert.equal(await Organization.countDocuments(), 1);
+  assert.equal(await OrganizationUser.countDocuments(), 1);
+
+  const sih = await Opportunity.findOne({ title: 'Smart India Hackathon 2026' });
+  assert.equal(sih.organization, 'AICTE & Ministry of Education');
+  assert.equal(sih.type, 'Hackathon');
+  assert.equal(sih.approvalStatus, 'approved');
+  assert.equal(sih.applicationUrl, 'https://www.sih.gov.in/');
 });

@@ -6,8 +6,14 @@ const LearningPath = require('../models/LearningPath');
 const RoadmapStep = require('../models/RoadmapStep');
 const User = require('../models/User');
 const Achievement = require('../models/Achievement');
+const Organization = require('../models/Organization');
+const OrganizationUser = require('../models/OrganizationUser');
+const Opportunity = require('../models/Opportunity');
+const OpportunitySkill = require('../models/OpportunitySkill');
 const { PATH_SKILLS } = require('../data/pathSkills');
 const { ACHIEVEMENT_CATALOG } = require('../data/achievements');
+const { WFS_OPPORTUNITIES } = require('../data/opportunities');
+const { matchCatalogSkills } = require('../services/opportunitySkillMatcher');
 
 function slugify(value) {
   return String(value)
@@ -231,6 +237,8 @@ async function seedDatabase() {
   }
 
   const achievementCount = await seedAchievements();
+  await seedAdmin();
+  const opportunitySeed = await seedOpportunities();
 
   return {
     skillCount: skillMap.size,
@@ -239,6 +247,142 @@ async function seedDatabase() {
       pathId: { $in: [...pathIds.values()] },
     }),
     achievementCount,
+    ...opportunitySeed,
+  };
+}
+
+function parseSeedDate(value) {
+  const [year, month, day] = String(value).split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+async function seedAdmin() {
+  let admin = await User.findOne({ email: 'admin@pathforge.test' });
+  if (!admin) {
+    admin = await User.create({
+      name: 'PathForge Admin',
+      email: 'admin@pathforge.test',
+      password: 'password12',
+      role: 'admin',
+      onboardingCompleted: true,
+    });
+  } else if (admin.role !== 'admin') {
+    admin.role = 'admin';
+    admin.onboardingCompleted = true;
+    await admin.save();
+  }
+
+  return { adminCount: await User.countDocuments({ role: 'admin' }) };
+}
+
+async function seedOrganizations() {
+  const organization = await Organization.findOneAndUpdate(
+    { slug: 'pathforge-demo-org' },
+    {
+      $set: {
+        name: 'PathForge Demo Org',
+        slug: 'pathforge-demo-org',
+        email: 'org@pathforge.test',
+        website: 'https://example.com',
+        description: 'Demo organization for the PathForge college project.',
+        status: 'active',
+      },
+    },
+    { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
+  );
+
+  let owner = await User.findOne({ email: 'org@pathforge.test' });
+  if (!owner) {
+    owner = await User.create({
+      name: 'Demo Organization',
+      email: 'org@pathforge.test',
+      password: 'password12',
+      role: 'organization',
+      onboardingCompleted: true,
+    });
+  } else if (owner.role !== 'organization') {
+    owner.role = 'organization';
+    owner.onboardingCompleted = true;
+    await owner.save();
+  }
+
+  await OrganizationUser.findOneAndUpdate(
+    { organizationId: organization._id, userId: owner._id },
+    {
+      $set: {
+        organizationId: organization._id,
+        userId: owner._id,
+        role: 'owner',
+      },
+    },
+    { upsert: true, setDefaultsOnInsert: true }
+  );
+
+  return {
+    organizationCount: await Organization.countDocuments(),
+    organizationUserCount: await OrganizationUser.countDocuments(),
+    adminCount: await User.countDocuments({ role: 'admin' }),
+  };
+}
+
+async function seedOpportunities() {
+  const orgSeed = await seedOrganizations();
+  const catalog = await Skill.find().sort({ name: 1 });
+
+  for (const row of WFS_OPPORTUNITIES) {
+    const doc = await Opportunity.findOneAndUpdate(
+      { title: row.title },
+      {
+        $set: {
+          title: row.title,
+          organization: row.organization,
+          type: row.type,
+          description: row.description,
+          requiredSkills: row.requiredSkills,
+          eligibility: row.eligibility,
+          deadline: parseSeedDate(row.deadline),
+          applicationUrl: row.applicationUrl,
+          location: row.location,
+          approvalStatus: Opportunity.APPROVAL_APPROVED,
+          source: null,
+          externalId: null,
+          sourceUrl: null,
+          organizationId: null,
+          submittedByUserId: null,
+          rejectionReason: null,
+        },
+      },
+      { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
+    );
+
+    const matched = matchCatalogSkills(row.requiredSkills || '', catalog);
+    const keepIds = [];
+    for (const skill of matched) {
+      keepIds.push(skill._id);
+      await OpportunitySkill.findOneAndUpdate(
+        { opportunityId: doc._id, skillId: skill._id },
+        {
+          $setOnInsert: {
+            opportunityId: doc._id,
+            skillId: skill._id,
+          },
+        },
+        { upsert: true, setDefaultsOnInsert: true }
+      );
+    }
+
+    await OpportunitySkill.deleteMany({
+      opportunityId: doc._id,
+      skillId: { $nin: keepIds },
+    });
+  }
+
+  return {
+    opportunityCount: await Opportunity.countDocuments({
+      title: { $in: WFS_OPPORTUNITIES.map((item) => item.title) },
+    }),
+    opportunitySkillCount: await OpportunitySkill.countDocuments(),
+    ...orgSeed,
   };
 }
 
@@ -246,4 +390,7 @@ module.exports = {
   slugify,
   seedDatabase,
   seedAchievements,
+  seedOpportunities,
+  seedOrganizations,
+  seedAdmin,
 };

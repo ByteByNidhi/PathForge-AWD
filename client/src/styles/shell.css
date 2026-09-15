@@ -149,6 +149,7 @@
 .app-content {
   padding: var(--space-8);
   max-width: var(--content-max);
+  min-width: 0;
 }
 
 .app-menu-toggle {

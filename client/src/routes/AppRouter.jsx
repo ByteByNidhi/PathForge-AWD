@@ -3,6 +3,9 @@ import AppLayout from '../pages/AppLayout.jsx'
 import AchievementsPage from '../pages/AchievementsPage.jsx'
 import ComingSoonPage from '../pages/ComingSoonPage.jsx'
 import DashboardPage from '../pages/DashboardPage.jsx'
+import OpportunitiesPage from '../pages/OpportunitiesPage.jsx'
+import OpportunityDetailsPage from '../pages/OpportunityDetailsPage.jsx'
+import SavedOpportunitiesPage from '../pages/SavedOpportunitiesPage.jsx'
 import LoginPage from '../pages/auth/LoginPage.jsx'
 import OnboardingLayout from '../pages/OnboardingLayout.jsx'
 import OnboardingPage from '../pages/onboarding/OnboardingPage.jsx'
@@ -10,8 +13,21 @@ import ProfilePage from '../pages/ProfilePage.jsx'
 import RegisterPage from '../pages/auth/RegisterPage.jsx'
 import RoadmapsPage from '../pages/RoadmapsPage.jsx'
 import SkillsPage from '../pages/SkillsPage.jsx'
-import { GuestRoute, ProtectedRoute } from './guards.jsx'
+import { GuestRoute, OrganizationRoute, ProtectedRoute, StudentAppRoute, AdminRoute } from './guards.jsx'
 import { PATHS } from './paths.js'
+import OrganizationDashboardPage from '../pages/organization/OrganizationDashboardPage.jsx'
+import OrganizationMembersPage from '../pages/organization/OrganizationMembersPage.jsx'
+import OrganizationOpportunitiesPage from '../pages/organization/OrganizationOpportunitiesPage.jsx'
+import OrganizationOpportunityDetailsPage from '../pages/organization/OrganizationOpportunityDetailsPage.jsx'
+import OrganizationOpportunityEditPage from '../pages/organization/OrganizationOpportunityEditPage.jsx'
+import OrganizationOpportunityNewPage from '../pages/organization/OrganizationOpportunityNewPage.jsx'
+import OrganizationProfilePage from '../pages/organization/OrganizationProfilePage.jsx'
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage.jsx'
+import AdminOpportunitiesPage from '../pages/admin/AdminOpportunitiesPage.jsx'
+import AdminOpportunityDetailsPage from '../pages/admin/AdminOpportunityDetailsPage.jsx'
+import AdminOpportunityFormPage from '../pages/admin/AdminOpportunityFormPage.jsx'
+import AdminOrganizationsPage from '../pages/admin/AdminOrganizationsPage.jsx'
+import AdminCareerPathRequestsPage from '../pages/admin/AdminCareerPathRequestsPage.jsx'
 
 function AppRouter() {
   return (
@@ -30,38 +46,43 @@ function AppRouter() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
-            <Route path={PATHS.DASHBOARD} element={<DashboardPage />} />
-            <Route path={PATHS.PROFILE} element={<ProfilePage />} />
-            <Route path={PATHS.SKILLS} element={<SkillsPage />} />
-            <Route path={PATHS.ROADMAP} element={<RoadmapsPage />} />
-            <Route
-              path={PATHS.SAVED}
-              element={
-                <ComingSoonPage
-                  title="Saved"
-                  description="Saved opportunities belong to the next sprint."
-                />
-              }
-            />
-            <Route
-              path={PATHS.OPPORTUNITIES}
-              element={
-                <ComingSoonPage
-                  title="Opportunity Hub"
-                  description="Opportunity matching and Himalayas import belong to the next sprint."
-                />
-              }
-            />
-            <Route
-              path={PATHS.AI_STUDIO}
-              element={
-                <ComingSoonPage
-                  title="AI Studio"
-                  description="Gemini-powered guidance belongs to a later sprint."
-                />
-              }
-            />
-            <Route path={PATHS.ACHIEVEMENTS} element={<AchievementsPage />} />
+            <Route element={<StudentAppRoute />}>
+              <Route path={PATHS.DASHBOARD} element={<DashboardPage />} />
+              <Route path={PATHS.PROFILE} element={<ProfilePage />} />
+              <Route path={PATHS.SKILLS} element={<SkillsPage />} />
+              <Route path={PATHS.ROADMAP} element={<RoadmapsPage />} />
+              <Route path={PATHS.SAVED} element={<SavedOpportunitiesPage />} />
+              <Route path={PATHS.OPPORTUNITIES} element={<OpportunitiesPage />} />
+              <Route path="/opportunities/:id" element={<OpportunityDetailsPage />} />
+              <Route
+                path={PATHS.AI_STUDIO}
+                element={
+                  <ComingSoonPage
+                    title="AI Studio"
+                    description="Gemini-powered guidance belongs to a later sprint."
+                  />
+                }
+              />
+              <Route path={PATHS.ACHIEVEMENTS} element={<AchievementsPage />} />
+            </Route>
+            <Route element={<OrganizationRoute />}>
+              <Route path={PATHS.ORGANIZATION} element={<OrganizationDashboardPage />} />
+              <Route path={PATHS.ORGANIZATION_PROFILE} element={<OrganizationProfilePage />} />
+              <Route path={PATHS.ORGANIZATION_MEMBERS} element={<OrganizationMembersPage />} />
+              <Route path={PATHS.ORGANIZATION_OPPORTUNITIES} element={<OrganizationOpportunitiesPage />} />
+              <Route path={PATHS.ORGANIZATION_OPPORTUNITY_NEW} element={<OrganizationOpportunityNewPage />} />
+              <Route path="/organization/opportunities/:id/edit" element={<OrganizationOpportunityEditPage />} />
+              <Route path="/organization/opportunities/:id" element={<OrganizationOpportunityDetailsPage />} />
+            </Route>
+            <Route element={<AdminRoute />}>
+              <Route path={PATHS.ADMIN} element={<AdminDashboardPage />} />
+              <Route path={PATHS.ADMIN_OPPORTUNITIES} element={<AdminOpportunitiesPage />} />
+              <Route path={PATHS.ADMIN_OPPORTUNITY_NEW} element={<AdminOpportunityFormPage mode="create" />} />
+              <Route path="/admin/opportunities/:id/edit" element={<AdminOpportunityFormPage mode="edit" />} />
+              <Route path="/admin/opportunities/:id" element={<AdminOpportunityDetailsPage />} />
+              <Route path={PATHS.ADMIN_ORGANIZATIONS} element={<AdminOrganizationsPage />} />
+              <Route path={PATHS.ADMIN_CAREER_PATH_REQUESTS} element={<AdminCareerPathRequestsPage />} />
+            </Route>
           </Route>
         </Route>
 

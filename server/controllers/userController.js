@@ -11,6 +11,7 @@ const {
   validateLocation,
   validateBio,
 } = require('../utils/validators');
+const { serializeUserWithOrganization } = require('../services/organizationAccess');
 
 const getProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)
@@ -22,7 +23,7 @@ const getProfile = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    user: user.toSafeObject(),
+    user: await serializeUserWithOrganization(user),
     skills: skills.map((item) => item.skill),
     progression,
   });
@@ -92,7 +93,7 @@ const updateProfile = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Profile updated',
-    user: user.toSafeObject(),
+    user: await serializeUserWithOrganization(user),
   });
 });
 

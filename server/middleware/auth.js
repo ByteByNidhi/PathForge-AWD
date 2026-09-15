@@ -39,6 +39,8 @@ function requireRoles(...roles) {
   };
 }
 
+const requireAdmin = requireRoles('admin');
+
 function requireOnboardingComplete(req, _res, next) {
   if (req.user.role === 'student' && !req.user.onboardingCompleted) {
     return next(new AppError('Complete onboarding to continue', 403));
@@ -49,5 +51,6 @@ function requireOnboardingComplete(req, _res, next) {
 module.exports = {
   protect,
   requireRoles,
+  requireAdmin,
   requireOnboardingComplete,
 };

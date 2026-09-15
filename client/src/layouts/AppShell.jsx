@@ -3,22 +3,28 @@ import {
   Bookmark,
   Bot,
   Briefcase,
+  Building2,
   Compass,
   LayoutDashboard,
   LogOut,
   Menu,
+  Route,
+  Shield,
   UserRound,
+  Users,
 } from 'lucide-react'
 import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import BrandMark from '../components/BrandMark.jsx'
 import Avatar from '../components/ui/Avatar.jsx'
 import Button from '../components/ui/Button.jsx'
 import Card from '../components/ui/Card.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { PATHS } from '../routes/paths.js'
+import { isAdmin } from '../utils/auth.js'
+import { isOrganizationUser } from '../utils/organization.js'
 
-const NAV_ITEMS = [
+const STUDENT_NAV_ITEMS = [
   { to: PATHS.DASHBOARD, label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: PATHS.ROADMAP, label: 'Roadmaps', icon: Compass },
   { to: PATHS.OPPORTUNITIES, label: 'Opportunity Hub', icon: Briefcase, end: true },
@@ -28,9 +34,45 @@ const NAV_ITEMS = [
   { to: PATHS.PROFILE, label: 'Profile', icon: UserRound },
 ]
 
+const ORGANIZATION_NAV_ITEMS = [
+  { to: PATHS.ORGANIZATION, label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: PATHS.ORGANIZATION_OPPORTUNITIES, label: 'Opportunities', icon: Briefcase },
+  { to: PATHS.ORGANIZATION_PROFILE, label: 'Profile', icon: Building2 },
+  { to: PATHS.ORGANIZATION_MEMBERS, label: 'Members', icon: Users },
+]
+
+const ADMIN_NAV_ITEMS = [
+  { to: PATHS.ADMIN, label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: PATHS.ADMIN_OPPORTUNITIES, label: 'Opportunities', icon: Briefcase },
+  { to: PATHS.ADMIN_ORGANIZATIONS, label: 'Organizations', icon: Building2 },
+  { to: PATHS.ADMIN_CAREER_PATH_REQUESTS, label: 'Career Path Requests', icon: Route },
+]
+
+function isOpportunityHubActive(pathname) {
+  if (pathname === PATHS.SAVED) {
+    return false
+  }
+  return pathname === PATHS.OPPORTUNITIES || pathname.startsWith(`${PATHS.OPPORTUNITIES}/`)
+}
+
+function isAdminOpportunitiesActive(pathname) {
+  return pathname === PATHS.ADMIN_OPPORTUNITIES || pathname.startsWith(`${PATHS.ADMIN_OPPORTUNITIES}/`)
+}
+
 function Sidebar({ open, onClose }) {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const adminPanel = isAdmin(user) && location.pathname.startsWith(PATHS.ADMIN)
+  const organizationNav = isOrganizationUser(user)
+  const navItems = adminPanel
+    ? ADMIN_NAV_ITEMS
+    : organizationNav
+      ? ORGANIZATION_NAV_ITEMS
+      : [
+          ...STUDENT_NAV_ITEMS,
+          ...(isAdmin(user) ? [{ to: PATHS.ADMIN, label: 'Admin', icon: Shield, end: false }] : []),
+        ]
 
   return (
     <aside className={`app-sidebar ${open ? 'is-open' : ''}`.trim()}>
@@ -40,12 +82,21 @@ function Sidebar({ open, onClose }) {
       </div>
 
       <nav aria-label="Primary">
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
-            className={({ isActive }) => `app-nav-link ${isActive ? 'is-active' : ''}`}
+            className={({ isActive }) => {
+              let active = isActive
+              if (!adminPanel && !organizationNav && item.to === PATHS.OPPORTUNITIES) {
+                active = isOpportunityHubActive(location.pathname)
+              }
+              if (adminPanel && item.to === PATHS.ADMIN_OPPORTUNITIES) {
+                active = isAdminOpportunitiesActive(location.pathname)
+              }
+              return `app-nav-link ${active ? 'is-active' : ''}`
+            }}
             onClick={onClose}
           >
             <item.icon aria-hidden="true" />
@@ -75,6 +126,11 @@ function Topbar({ onOpenMenu }) {
   const { user, logout } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
+  const profilePath = isOrganizationUser(user)
+    ? PATHS.ORGANIZATION_PROFILE
+    : isAdmin(user)
+      ? PATHS.ADMIN
+      : PATHS.PROFILE
 
   return (
     <header className="app-topbar">
@@ -106,7 +162,7 @@ function Topbar({ onOpenMenu }) {
                 variant="ghost"
                 onClick={() => {
                   setMenuOpen(false)
-                  navigate(PATHS.PROFILE)
+                  navigate(profilePath)
                 }}
               >
                 Profile
