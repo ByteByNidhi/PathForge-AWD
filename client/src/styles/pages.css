@@ -87,3 +87,188 @@
     padding: var(--space-5);
   }
 }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.dashboard-hero,
+.dashboard-stat,
+.dashboard-quest,
+.dashboard-slot,
+.roadmap-summary,
+.roadmap-step,
+.achievement-card {
+  padding: var(--space-6);
+}
+
+.dashboard-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.path-switcher {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.path-switcher__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  text-align: left;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-paper);
+  cursor: pointer;
+  color: inherit;
+}
+
+.path-switcher__item.is-selected,
+.path-switcher__item:hover {
+  border-color: var(--color-brand-emerald);
+  background: var(--color-surface-warm);
+}
+
+.path-switcher__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-cream);
+  color: var(--color-brand-forest);
+  flex-shrink: 0;
+}
+
+.roadmap-layout {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.roadmap-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.roadmap-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
+}
+
+.roadmap-step.is-locked {
+  opacity: 0.72;
+}
+
+.roadmap-step.is-current {
+  border-color: var(--color-brand-emerald);
+}
+
+.roadmap-step.is-completed {
+  border-color: #c9d7cb;
+}
+
+.roadmap-step__marker {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-cream);
+  color: var(--color-brand-forest);
+}
+
+.roadmap-step.is-current .roadmap-step__marker {
+  background: var(--color-brand-forest);
+  color: var(--color-text-on-dark);
+}
+
+.roadmap-step__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.roadmap-step__body h3 {
+  margin-bottom: var(--space-2);
+}
+
+.roadmap-step__xp {
+  margin: var(--space-3) 0;
+  font-weight: var(--weight-semibold);
+  color: var(--color-brand-emerald);
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.achievement-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4);
+}
+
+.achievement-card.is-locked {
+  opacity: 0.78;
+}
+
+.achievement-card__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-cream);
+  color: var(--color-brand-forest);
+}
+
+.achievement-card.is-unlocked .achievement-card__icon {
+  background: #e7eee8;
+}
+
+.achievement-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.achievement-card__date {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 960px) {
+  .dashboard-grid,
+  .dashboard-panels,
+  .achievement-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .roadmap-step,
+  .achievement-card {
+    grid-template-columns: 1fr;
+  }
+}

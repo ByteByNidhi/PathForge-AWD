@@ -4,11 +4,15 @@ const LearningPath = require('../models/LearningPath');
 const CareerPathRequest = require('../models/CareerPathRequest');
 const UserSkill = require('../models/UserSkill');
 const { assignCatalogueSkills } = require('./skillController');
+const achievementService = require('../services/achievementService');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 
 const getOnboarding = asyncHandler(async (req, res) => {
-  const learningPaths = await LearningPath.find({ isPublished: true }).sort({ title: 1 });
+  const learningPaths = await LearningPath.find({ isPublished: true }).sort({
+    pathName: 1,
+    title: 1,
+  });
 
   res.status(200).json({
     success: true,
@@ -79,8 +83,10 @@ const completeOnboarding = asyncHandler(async (req, res) => {
   });
 
   const user = await User.findById(req.user.id)
-    .populate('learningPath', 'title slug description')
+    .populate('learningPath', 'title pathName slug description')
     .populate('careerPathRequest', 'requestedPath status');
+
+  await achievementService.checkAndUnlock(user);
 
   const skills = await UserSkill.find({ user: req.user.id }).populate('skill');
 

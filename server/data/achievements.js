@@ -1,0 +1,60 @@
+const ACHIEVEMENT_CATALOG = [
+  {
+    slug: 'path-ignited',
+    name: 'PATH IGNITED',
+    description: 'Complete 1 roadmap step',
+    icon: 'flame',
+    rarity: 'common',
+    conditionType: 'completed_steps',
+    conditionValue: 1,
+  },
+  {
+    slug: 'trailblazer',
+    name: 'TRAILBLAZER',
+    description: 'Complete 10 roadmap steps',
+    icon: 'compass',
+    rarity: 'rare',
+    conditionType: 'completed_steps',
+    conditionValue: 10,
+  },
+  {
+    slug: 'summit-seeker',
+    name: 'SUMMIT SEEKER',
+    description: 'Reach 50% roadmap completion',
+    icon: 'mountain',
+    rarity: 'epic',
+    conditionType: 'roadmap_percent',
+    conditionValue: 50,
+  },
+  {
+    slug: 'skillforged',
+    name: 'SKILLFORGED',
+    description: 'Add 5 skills',
+    icon: 'anvil',
+    rarity: 'rare',
+    conditionType: 'skills_count',
+    conditionValue: 5,
+  },
+  {
+    slug: 'xp-overdrive',
+    name: 'XP OVERDRIVE',
+    description: 'Reach 500 XP',
+    icon: 'lightning',
+    rarity: 'epic',
+    conditionType: 'xp',
+    conditionValue: 500,
+  },
+  {
+    slug: 'ascendant',
+    name: 'ASCENDANT',
+    description: 'Reach Level 5',
+    icon: 'star',
+    rarity: 'legendary',
+    conditionType: 'level',
+    conditionValue: 5,
+  },
+];
+
+module.exports = {
+  ACHIEVEMENT_CATALOG,
+};

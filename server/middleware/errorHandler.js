@@ -38,7 +38,7 @@ function errorHandler(err, _req, res, _next) {
     message = 'Authentication required';
   }
 
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && status >= 500) {
     console.error(err);
   }
 

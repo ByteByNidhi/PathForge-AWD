@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
 const Skill = require('../models/Skill');
 const UserSkill = require('../models/UserSkill');
+const User = require('../models/User');
 const LearningPath = require('../models/LearningPath');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
+const achievementService = require('../services/achievementService');
 
 const listSkills = asyncHandler(async (_req, res) => {
   const skills = await Skill.find().sort({ name: 1 });
@@ -78,6 +80,8 @@ async function assignCatalogueSkills(userId, skillIds) {
 const assignMySkills = asyncHandler(async (req, res) => {
   const skillIds = req.body.skillIds || (req.body.skillId ? [req.body.skillId] : []);
   const skills = await assignCatalogueSkills(req.user.id, skillIds);
+  const user = await User.findById(req.user.id);
+  await achievementService.checkAndUnlock(user);
 
   res.status(200).json({
     success: true,

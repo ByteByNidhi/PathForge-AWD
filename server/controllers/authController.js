@@ -92,7 +92,7 @@ const login = asyncHandler(async (req, res) => {
 
 const me = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)
-    .populate('learningPath', 'title slug description isPublished')
+    .populate('learningPath', 'title pathName slug description isPublished')
     .populate('careerPathRequest', 'requestedPath status');
 
   res.status(200).json({

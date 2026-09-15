@@ -2,6 +2,7 @@ const User = require('../models/User');
 const UserSkill = require('../models/UserSkill');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
+const progressionService = require('../services/progressionService');
 const {
   normalizeName,
   normalizeEmail,
@@ -13,15 +14,17 @@ const {
 
 const getProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id)
-    .populate('learningPath', 'title slug description')
+    .populate('learningPath', 'title pathName slug description icon')
     .populate('careerPathRequest', 'requestedPath status');
 
   const skills = await UserSkill.find({ user: req.user.id }).populate('skill');
+  const progression = await progressionService.buildProgressionSummary(user);
 
   res.status(200).json({
     success: true,
     user: user.toSafeObject(),
     skills: skills.map((item) => item.skill),
+    progression,
   });
 });
 
@@ -83,7 +86,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     new: true,
     runValidators: true,
   })
-    .populate('learningPath', 'title slug description')
+    .populate('learningPath', 'title pathName slug description')
     .populate('careerPathRequest', 'requestedPath status');
 
   res.status(200).json({

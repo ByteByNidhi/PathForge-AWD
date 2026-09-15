@@ -1,11 +1,6 @@
-const express = require('express');
-const cors = require('cors');
 const env = require('./config/env');
 const connectDb = require('./config/db');
-const corsOptions = require('./config/cors');
-const apiRouter = require('./routes');
-const notFound = require('./middleware/notFound');
-const errorHandler = require('./middleware/errorHandler');
+const createApp = require('./app');
 
 async function start() {
   if (!env.jwtSecret) {
@@ -20,15 +15,7 @@ async function start() {
     process.exit(1);
   }
 
-  const app = express();
-
-  app.use(cors(corsOptions));
-  app.use(express.json({ limit: '1mb' }));
-
-  app.use('/api', apiRouter);
-
-  app.use(notFound);
-  app.use(errorHandler);
+  const app = createApp();
 
   app.listen(env.port, () => {
     console.log(`PathForge API listening on port ${env.port}`);

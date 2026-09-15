@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from '../pages/AppLayout.jsx'
+import AchievementsPage from '../pages/AchievementsPage.jsx'
 import ComingSoonPage from '../pages/ComingSoonPage.jsx'
 import DashboardPage from '../pages/DashboardPage.jsx'
 import LoginPage from '../pages/auth/LoginPage.jsx'
@@ -7,6 +8,7 @@ import OnboardingLayout from '../pages/OnboardingLayout.jsx'
 import OnboardingPage from '../pages/onboarding/OnboardingPage.jsx'
 import ProfilePage from '../pages/ProfilePage.jsx'
 import RegisterPage from '../pages/auth/RegisterPage.jsx'
+import RoadmapsPage from '../pages/RoadmapsPage.jsx'
 import SkillsPage from '../pages/SkillsPage.jsx'
 import { GuestRoute, ProtectedRoute } from './guards.jsx'
 import { PATHS } from './paths.js'
@@ -31,15 +33,7 @@ function AppRouter() {
             <Route path={PATHS.DASHBOARD} element={<DashboardPage />} />
             <Route path={PATHS.PROFILE} element={<ProfilePage />} />
             <Route path={PATHS.SKILLS} element={<SkillsPage />} />
-            <Route
-              path={PATHS.ROADMAP}
-              element={
-                <ComingSoonPage
-                  title="Roadmaps"
-                  description="Ordered roadmap steps and progression belong to the next sprint."
-                />
-              }
-            />
+            <Route path={PATHS.ROADMAP} element={<RoadmapsPage />} />
             <Route
               path={PATHS.SAVED}
               element={
@@ -67,15 +61,7 @@ function AppRouter() {
                 />
               }
             />
-            <Route
-              path={PATHS.ACHIEVEMENTS}
-              element={
-                <ComingSoonPage
-                  title="Achievements"
-                  description="Achievement unlocking belongs to a later sprint."
-                />
-              }
-            />
+            <Route path={PATHS.ACHIEVEMENTS} element={<AchievementsPage />} />
           </Route>
         </Route>
 
