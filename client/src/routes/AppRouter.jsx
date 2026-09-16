@@ -1,11 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from '../pages/AppLayout.jsx'
 import AchievementsPage from '../pages/AchievementsPage.jsx'
-import ComingSoonPage from '../pages/ComingSoonPage.jsx'
 import DashboardPage from '../pages/DashboardPage.jsx'
 import OpportunitiesPage from '../pages/OpportunitiesPage.jsx'
 import OpportunityDetailsPage from '../pages/OpportunityDetailsPage.jsx'
 import SavedOpportunitiesPage from '../pages/SavedOpportunitiesPage.jsx'
+import LandingPage from '../pages/LandingPage.jsx'
 import LoginPage from '../pages/auth/LoginPage.jsx'
 import OnboardingLayout from '../pages/OnboardingLayout.jsx'
 import OnboardingPage from '../pages/onboarding/OnboardingPage.jsx'
@@ -28,6 +28,15 @@ import AdminOpportunityDetailsPage from '../pages/admin/AdminOpportunityDetailsP
 import AdminOpportunityFormPage from '../pages/admin/AdminOpportunityFormPage.jsx'
 import AdminOrganizationsPage from '../pages/admin/AdminOrganizationsPage.jsx'
 import AdminCareerPathRequestsPage from '../pages/admin/AdminCareerPathRequestsPage.jsx'
+import AdminRoadmapsPage from '../pages/admin/AdminRoadmapsPage.jsx'
+import AdminRoadmapDetailsPage from '../pages/admin/AdminRoadmapDetailsPage.jsx'
+import AdminRoadmapPreviewPage from '../pages/admin/AdminRoadmapPreviewPage.jsx'
+import AdminRoadmapStepFormPage from '../pages/admin/AdminRoadmapStepFormPage.jsx'
+import AdminUsersPage from '../pages/admin/AdminUsersPage.jsx'
+import AdminUserDetailsPage from '../pages/admin/AdminUserDetailsPage.jsx'
+import AdminSubscriptionsPage from '../pages/admin/AdminSubscriptionsPage.jsx'
+import AdminSubscriptionDetailsPage from '../pages/admin/AdminSubscriptionDetailsPage.jsx'
+import AiStudioPage from '../pages/AiStudioPage.jsx'
 
 function AppRouter() {
   return (
@@ -54,15 +63,7 @@ function AppRouter() {
               <Route path={PATHS.SAVED} element={<SavedOpportunitiesPage />} />
               <Route path={PATHS.OPPORTUNITIES} element={<OpportunitiesPage />} />
               <Route path="/opportunities/:id" element={<OpportunityDetailsPage />} />
-              <Route
-                path={PATHS.AI_STUDIO}
-                element={
-                  <ComingSoonPage
-                    title="AI Studio"
-                    description="Gemini-powered guidance belongs to a later sprint."
-                  />
-                }
-              />
+              <Route path={PATHS.AI_STUDIO} element={<AiStudioPage />} />
               <Route path={PATHS.ACHIEVEMENTS} element={<AchievementsPage />} />
             </Route>
             <Route element={<OrganizationRoute />}>
@@ -82,12 +83,21 @@ function AppRouter() {
               <Route path="/admin/opportunities/:id" element={<AdminOpportunityDetailsPage />} />
               <Route path={PATHS.ADMIN_ORGANIZATIONS} element={<AdminOrganizationsPage />} />
               <Route path={PATHS.ADMIN_CAREER_PATH_REQUESTS} element={<AdminCareerPathRequestsPage />} />
+              <Route path={PATHS.ADMIN_ROADMAPS} element={<AdminRoadmapsPage />} />
+              <Route path="/admin/roadmaps/:id/preview" element={<AdminRoadmapPreviewPage />} />
+              <Route path="/admin/roadmaps/:id/steps/new" element={<AdminRoadmapStepFormPage mode="create" />} />
+              <Route path="/admin/roadmaps/:id/steps/:stepId/edit" element={<AdminRoadmapStepFormPage mode="edit" />} />
+              <Route path="/admin/roadmaps/:id" element={<AdminRoadmapDetailsPage />} />
+              <Route path={PATHS.ADMIN_USERS} element={<AdminUsersPage />} />
+              <Route path="/admin/users/:id" element={<AdminUserDetailsPage />} />
+              <Route path={PATHS.ADMIN_SUBSCRIPTIONS} element={<AdminSubscriptionsPage />} />
+              <Route path="/admin/subscriptions/:id" element={<AdminSubscriptionDetailsPage />} />
             </Route>
           </Route>
         </Route>
 
-        <Route path={PATHS.ROOT} element={<Navigate to={PATHS.LOGIN} replace />} />
-        <Route path="*" element={<Navigate to={PATHS.LOGIN} replace />} />
+        <Route path={PATHS.ROOT} element={<LandingPage />} />
+        <Route path="*" element={<Navigate to={PATHS.ROOT} replace />} />
       </Routes>
     </BrowserRouter>
   )

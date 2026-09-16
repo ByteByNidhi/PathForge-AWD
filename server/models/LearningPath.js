@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const SOURCE_CURATED = 'curated';
+const SOURCE_AI = 'ai';
+
 const learningPathSchema = new mongoose.Schema(
   {
     title: {
@@ -35,7 +38,8 @@ const learningPathSchema = new mongoose.Schema(
     },
     roadmapSource: {
       type: String,
-      default: 'curated',
+      default: SOURCE_CURATED,
+      enum: [SOURCE_CURATED, SOURCE_AI],
       trim: true,
     },
     roadmapGeneratedAt: {
@@ -108,4 +112,21 @@ learningPathSchema.methods.relatedPathSkills = function relatedPathSkills() {
   return this.populate('skills');
 };
 
+learningPathSchema.methods.isAiGenerated = function isAiGenerated() {
+  return this.roadmapSource === SOURCE_AI;
+};
+
+learningPathSchema.methods.hasLiveStudentProgress = async function hasLiveStudentProgress() {
+  const UserProgress = require('./UserProgress');
+  const published = await this.publishedRoadmapSteps().select('_id');
+  const stepIds = published.map((step) => step._id);
+  if (!stepIds.length) {
+    return false;
+  }
+  const existing = await UserProgress.exists({ roadmapStepId: { $in: stepIds } });
+  return Boolean(existing);
+};
+
 module.exports = mongoose.model('LearningPath', learningPathSchema);
+module.exports.SOURCE_CURATED = SOURCE_CURATED;
+module.exports.SOURCE_AI = SOURCE_AI;

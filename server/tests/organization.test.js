@@ -273,6 +273,24 @@ test('deadline cannot be beyond 1 year', async () => {
   assert.match(response.body.message, /1 year/i);
 });
 
+test('organization deadline cannot be in the past and today is accepted', async () => {
+  const { token } = await createOrganizationOwner();
+  const yesterday = await authed('post', '/api/organization/opportunities', token)
+    .send(opportunityPayload({ title: 'Yesterday Deadline', deadline: dateOnly(daysFromNow(-1)) }))
+    .expect(400);
+  assert.match(yesterday.body.message, /today or later/i);
+
+  const today = await authed('post', '/api/organization/opportunities', token)
+    .send(opportunityPayload({ title: 'Today Deadline', deadline: dateOnly(daysFromNow(0)) }))
+    .expect(201);
+  assert.equal(today.body.opportunity.title, 'Today Deadline');
+
+  const valid = await authed('post', '/api/organization/opportunities', token)
+    .send(opportunityPayload({ title: 'Six Month Deadline', deadline: dateOnly(daysFromNow(180)) }))
+    .expect(201);
+  assert.equal(valid.body.opportunity.title, 'Six Month Deadline');
+});
+
 test('invalid application URL is rejected', async () => {
   const { token } = await createOrganizationOwner();
   const response = await authed('post', '/api/organization/opportunities', token)

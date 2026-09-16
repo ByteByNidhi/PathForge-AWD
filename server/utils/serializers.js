@@ -37,9 +37,11 @@ function serializeLearningPath(path, options = {}) {
     slug: path.slug,
     isPublished: path.isPublished !== false,
     roadmapSource: path.roadmapSource || 'curated',
-    roadmapGeneratedAt: path.roadmapGeneratedAt ?? null,
-    roadmapDraftTitle: path.roadmapDraftTitle ?? null,
-    roadmapDraftDescription: path.roadmapDraftDescription ?? null,
+    roadmapGeneratedAt: options.includeDraftMeta ? path.roadmapGeneratedAt ?? null : undefined,
+    roadmapDraftTitle: options.includeDraftMeta ? path.roadmapDraftTitle ?? null : undefined,
+    roadmapDraftDescription: options.includeDraftMeta
+      ? path.roadmapDraftDescription ?? null
+      : undefined,
     roadmapMeta: path.roadmapMeta,
     selected: hasSelected ? idOf(options.selectedPathId) === id : undefined,
     ...(skills ? { skills } : {}),

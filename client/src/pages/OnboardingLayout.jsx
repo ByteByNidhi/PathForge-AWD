@@ -3,8 +3,8 @@ import BrandMark from '../components/BrandMark.jsx'
 
 function OnboardingLayout() {
   return (
-    <div className="auth-layout">
-      <section className="auth-visual">
+    <div className="onboarding-shell">
+      <section className="onboarding-shell__visual">
         <div className="auth-visual__brand">
           <BrandMark className="auth-visual__logo" />
           <span className="auth-visual__name">PathForge</span>
@@ -14,11 +14,11 @@ function OnboardingLayout() {
             Three steps
           </p>
           <h1>Career path, skills, confirm.</h1>
-          <p>This is the same onboarding sequence as PathForge-WFS, presented in the AWD visual system.</p>
+          <p>Tell us where you are starting. Catalogue skills stay available, and experienced students can add a skill by name.</p>
         </div>
         <p className="auth-visual__note">Beginners can finish with zero skills.</p>
       </section>
-      <main className="auth-panel" style={{ alignItems: 'stretch', overflow: 'auto' }}>
+      <main className="onboarding-shell__panel">
         <Outlet />
       </main>
     </div>

@@ -68,6 +68,16 @@ const userSchema = new mongoose.Schema(
       default: 1,
       min: 1,
     },
+    aiStudioHistory: {
+      type: [
+        {
+          role: { type: String, enum: ['user', 'model'], required: true },
+          text: { type: String, required: true },
+        },
+      ],
+      default: [],
+      select: false,
+    },
   },
   { timestamps: true }
 );
@@ -111,6 +121,7 @@ userSchema.methods.toSafeObject = function toSafeObject() {
   const user = this.toObject({ virtuals: true });
   delete user.password;
   delete user.__v;
+  delete user.aiStudioHistory;
   user.xpIntoLevel = xpIntoLevel(user.xp);
   return user;
 };
@@ -120,6 +131,7 @@ userSchema.set('toJSON', {
   transform(_doc, ret) {
     delete ret.password;
     delete ret.__v;
+    delete ret.aiStudioHistory;
     ret.xpIntoLevel = xpIntoLevel(ret.xp);
     return ret;
   },

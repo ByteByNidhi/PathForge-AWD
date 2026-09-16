@@ -3,6 +3,10 @@ const adminOpportunityService = require('../services/adminOpportunityService');
 const adminOrganizationService = require('../services/adminOrganizationService');
 const adminCareerPathRequestService = require('../services/adminCareerPathRequestService');
 const opportunityImportService = require('../services/opportunityImportService');
+const adminRoadmapService = require('../services/adminRoadmapService');
+const adminUserService = require('../services/adminUserService');
+const demoSubscriptionCatalog = require('../services/demoSubscriptionCatalog');
+const AppError = require('../utils/AppError');
 
 const getDashboard = asyncHandler(async (_req, res) => {
   const payload = await adminOpportunityService.dashboard();
@@ -114,6 +118,122 @@ const reviewCareerPathRequests = asyncHandler(async (req, res) => {
   });
 });
 
+const listRoadmaps = asyncHandler(async (_req, res) => {
+  const payload = await adminRoadmapService.list();
+  res.status(200).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const getRoadmap = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.show(req.params.pathId);
+  res.status(200).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const generateRoadmap = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.generate(req.params.pathId, req.body);
+  res.status(200).json({
+    success: true,
+    message: 'AI draft generated. Review it before publishing. Users cannot see this draft.',
+    ...payload,
+  });
+});
+
+const previewRoadmap = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.preview(req.params.pathId);
+  res.status(200).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const publishRoadmap = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.publish(req.params.pathId);
+  res.status(200).json({
+    success: true,
+    message: 'AI roadmap published. Users can now see these steps.',
+    ...payload,
+  });
+});
+
+const createRoadmapStep = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.storeStep(req.params.pathId, req.body);
+  res.status(201).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const updateRoadmapStep = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.updateStep(req.params.pathId, req.params.stepId, req.body);
+  res.status(200).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const deleteRoadmapStep = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.destroyStep(req.params.pathId, req.params.stepId);
+  res.status(200).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const listUsers = asyncHandler(async (_req, res) => {
+  const payload = await adminUserService.list();
+  res.status(200).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const getUser = asyncHandler(async (req, res) => {
+  const payload = await adminUserService.show(req.params.id);
+  res.status(200).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const listSubscriptions = asyncHandler(async (_req, res) => {
+  res.status(200).json({
+    success: true,
+    demo: true,
+    summary: demoSubscriptionCatalog.summary(),
+    subscriptions: demoSubscriptionCatalog.all(),
+  });
+});
+
+const getSubscription = asyncHandler(async (req, res) => {
+  const subscription = demoSubscriptionCatalog.find(req.params.id);
+  if (!subscription) {
+    throw new AppError('Subscription not found', 404);
+  }
+  res.status(200).json({
+    success: true,
+    demo: true,
+    subscription,
+  });
+});
+
+const upgradeSubscription = asyncHandler(async (req, res) => {
+  const subscription = demoSubscriptionCatalog.find(req.params.id);
+  if (!subscription) {
+    throw new AppError('Subscription not found', 404);
+  }
+  res.status(200).json({
+    success: true,
+    demo: true,
+    message: 'Upgrade Plan is a demonstration control only. No payment was processed.',
+    subscription,
+  });
+});
+
 module.exports = {
   getDashboard,
   listOpportunities,
@@ -128,4 +248,17 @@ module.exports = {
   createOrganization,
   listCareerPathRequests,
   reviewCareerPathRequests,
+  listRoadmaps,
+  getRoadmap,
+  generateRoadmap,
+  previewRoadmap,
+  publishRoadmap,
+  createRoadmapStep,
+  updateRoadmapStep,
+  deleteRoadmapStep,
+  listUsers,
+  getUser,
+  listSubscriptions,
+  getSubscription,
+  upgradeSubscription,
 };

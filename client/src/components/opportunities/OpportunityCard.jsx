@@ -16,7 +16,7 @@ function OpportunityCard({ opportunity, pending, onToggleSave }) {
   const saving = pending === id
 
   return (
-    <Card as="article" className="opportunity-card">
+    <Card as="article" className={`opportunity-card ${opportunity.saved ? 'is-saved' : ''}`.trim()}>
       <div className="opportunity-card__top">
         <div>
           <h2>
@@ -47,6 +47,7 @@ function OpportunityCard({ opportunity, pending, onToggleSave }) {
         </Link>
         <Button
           variant="ghost"
+          className={opportunity.saved ? 'opportunity-card__save is-on' : 'opportunity-card__save'}
           onClick={() => onToggleSave(opportunity)}
           disabled={saving}
           aria-pressed={Boolean(opportunity.saved)}

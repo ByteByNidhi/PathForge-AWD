@@ -82,7 +82,7 @@ function OrganizationDashboardPage() {
   const isOwner = Boolean(data.permissions?.isOwner)
 
   return (
-    <div>
+    <div className="org-page">
       <PageHeader
         eyebrow="Organization"
         title={data.organization?.name || 'Organization'}

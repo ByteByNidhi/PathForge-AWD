@@ -4,7 +4,13 @@ const LearningPath = require('../models/LearningPath');
 const CareerPathRequest = require('../models/CareerPathRequest');
 const UserSkill = require('../models/UserSkill');
 const { assignCatalogueSkills } = require('./skillController');
+const {
+  collectSkillNames,
+  resolveSkillIds,
+  validateSkillName,
+} = require('../services/skillCatalogService');
 const achievementService = require('../services/achievementService');
+const progressionService = require('../services/progressionService');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -71,8 +77,33 @@ const completeOnboarding = asyncHandler(async (req, res) => {
 
   if (isBeginner) {
     await UserSkill.deleteMany({ user: req.user.id });
-  } else if (skillIds.length) {
-    await assignCatalogueSkills(req.user.id, skillIds);
+  } else {
+    const skillNames = collectSkillNames(req.body);
+    const nameError = skillNames.map((name) => validateSkillName(name)).find(Boolean);
+    if (nameError) {
+      throw new AppError(nameError, 400, [{ field: 'skillName', message: nameError }]);
+    }
+
+    const resolvedIds = await resolveSkillIds({
+      skillIds,
+      skillNames,
+    });
+    if (!resolvedIds.length && !isOther) {
+      throw new AppError(
+        "Select at least one skill, or choose “I'm a total beginner” if you are starting from the first step.",
+        400,
+        [
+          {
+            field: 'skillIds',
+            message:
+              "Select at least one skill, or choose “I'm a total beginner” if you are starting from the first step.",
+          },
+        ]
+      );
+    }
+    if (resolvedIds.length) {
+      await assignCatalogueSkills(req.user.id, resolvedIds);
+    }
   }
 
   await User.findByIdAndUpdate(req.user.id, {
@@ -82,9 +113,17 @@ const completeOnboarding = asyncHandler(async (req, res) => {
     careerPathRequest,
   });
 
-  const user = await User.findById(req.user.id)
+  let user = await User.findById(req.user.id)
     .populate('learningPath', 'title pathName slug description')
     .populate('careerPathRequest', 'requestedPath status');
+
+  if (!isBeginner && learningPath) {
+    const path = await LearningPath.findById(learningPath);
+    await progressionService.creditOnboardingSkills(user, path);
+    user = await User.findById(req.user.id)
+      .populate('learningPath', 'title pathName slug description')
+      .populate('careerPathRequest', 'requestedPath status');
+  }
 
   await achievementService.checkAndUnlock(user);
 

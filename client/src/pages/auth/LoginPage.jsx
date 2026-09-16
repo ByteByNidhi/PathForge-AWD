@@ -13,6 +13,7 @@ function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
+  const [fieldErrors, setFieldErrors] = useState({})
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -23,6 +24,14 @@ function LoginPage() {
   const onSubmit = async (event) => {
     event.preventDefault()
     setError('')
+    const next = {}
+    if (!form.email.trim()) next.email = 'Email is required'
+    if (!form.password) next.password = 'Password is required'
+    setFieldErrors(next)
+    if (Object.keys(next).length) {
+      return
+    }
+
     setSubmitting(true)
     try {
       const user = await login(form)
@@ -67,7 +76,7 @@ function LoginPage() {
               autoComplete="email"
               value={form.email}
               onChange={onChange}
-              required
+              error={fieldErrors.email}
             />
             <Input
               id="password"
@@ -77,7 +86,7 @@ function LoginPage() {
               autoComplete="current-password"
               value={form.password}
               onChange={onChange}
-              required
+              error={fieldErrors.password}
             />
             <Button type="submit" block disabled={submitting}>
               {submitting ? 'Signing in…' : 'Sign in'}

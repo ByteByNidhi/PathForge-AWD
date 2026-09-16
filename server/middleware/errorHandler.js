@@ -42,7 +42,8 @@ function errorHandler(err, _req, res, _next) {
     console.error(err);
   }
 
-  if (status >= 500 && process.env.NODE_ENV === 'production') {
+  const knownClientError = err instanceof AppError;
+  if (status >= 500 && process.env.NODE_ENV === 'production' && !knownClientError) {
     message = 'Internal server error';
     errors = null;
   }

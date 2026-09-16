@@ -64,3 +64,68 @@ export async function reviewAdminCareerPathRequests(payload) {
   const { data } = await api.post('/admin/career-path-requests/review', payload)
   return data
 }
+
+export async function fetchAdminRoadmaps() {
+  const { data } = await api.get('/admin/roadmaps')
+  return data
+}
+
+export async function fetchAdminRoadmap(id) {
+  const { data } = await api.get(`/admin/roadmaps/${id}`)
+  return data
+}
+
+export async function generateAdminRoadmap(id, payload) {
+  const { data } = await api.post(`/admin/roadmaps/${id}/generate`, payload, { timeout: 60000 })
+  return data
+}
+
+export async function fetchAdminRoadmapPreview(id) {
+  const { data } = await api.get(`/admin/roadmaps/${id}/preview`)
+  return data
+}
+
+export async function publishAdminRoadmap(id) {
+  const { data } = await api.post(`/admin/roadmaps/${id}/publish`)
+  return data
+}
+
+export async function createAdminRoadmapStep(pathId, payload) {
+  const { data } = await api.post(`/admin/roadmaps/${pathId}/steps`, payload)
+  return data
+}
+
+export async function updateAdminRoadmapStep(pathId, stepId, payload) {
+  const { data } = await api.put(`/admin/roadmaps/${pathId}/steps/${stepId}`, payload)
+  return data
+}
+
+export async function deleteAdminRoadmapStep(pathId, stepId) {
+  const { data } = await api.delete(`/admin/roadmaps/${pathId}/steps/${stepId}`)
+  return data
+}
+
+export async function fetchAdminUsers() {
+  const { data } = await api.get('/admin/users')
+  return data
+}
+
+export async function fetchAdminUser(id) {
+  const { data } = await api.get(`/admin/users/${id}`)
+  return data
+}
+
+export async function fetchAdminSubscriptions() {
+  const { data } = await api.get('/admin/subscriptions')
+  return data
+}
+
+export async function fetchAdminSubscription(id) {
+  const { data } = await api.get(`/admin/subscriptions/${id}`)
+  return data
+}
+
+export async function upgradeAdminSubscription(id) {
+  const { data } = await api.post(`/admin/subscriptions/${id}/upgrade`)
+  return data
+}

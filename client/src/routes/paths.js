@@ -26,6 +26,15 @@ export const PATHS = {
   adminOpportunityEdit: (id) => `/admin/opportunities/${id}/edit`,
   ADMIN_ORGANIZATIONS: '/admin/organizations',
   ADMIN_CAREER_PATH_REQUESTS: '/admin/career-path-requests',
+  ADMIN_ROADMAPS: '/admin/roadmaps',
+  adminRoadmap: (id) => `/admin/roadmaps/${id}`,
+  adminRoadmapPreview: (id) => `/admin/roadmaps/${id}/preview`,
+  adminRoadmapStepNew: (id) => `/admin/roadmaps/${id}/steps/new`,
+  adminRoadmapStepEdit: (pathId, stepId) => `/admin/roadmaps/${pathId}/steps/${stepId}/edit`,
+  ADMIN_USERS: '/admin/users',
+  adminUser: (id) => `/admin/users/${id}`,
+  ADMIN_SUBSCRIPTIONS: '/admin/subscriptions',
+  adminSubscription: (id) => `/admin/subscriptions/${id}`,
 }
 
 export const TOKEN_KEY = 'pathforge_token'

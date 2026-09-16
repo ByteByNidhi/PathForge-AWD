@@ -2,6 +2,7 @@ const User = require('../models/User');
 const LearningPath = require('../models/LearningPath');
 const RoadmapStep = require('../models/RoadmapStep');
 const UserProgress = require('../models/UserProgress');
+const UserSkill = require('../models/UserSkill');
 const AppError = require('../utils/AppError');
 const { idsEqual } = require('../utils/ids');
 const { calculateLevel, xpIntoLevel, roadmapProgressPercent } = require('../utils/level');
@@ -172,6 +173,48 @@ async function completeRoadmapStep(user, path, step) {
   };
 }
 
+function stepSkillIds(step) {
+  return (step.skills || [])
+    .map((skill) => String(skill && (skill._id || skill)))
+    .filter(Boolean);
+}
+
+function stepMatchesKnownSkills(step, knownSkillIds) {
+  const required = stepSkillIds(step);
+  if (!required.length) {
+    return false;
+  }
+  return required.every((id) => knownSkillIds.has(id));
+}
+
+async function creditOnboardingSkills(user, path) {
+  if (!user || !path) {
+    return user;
+  }
+
+  const records = await UserSkill.find({ user: user._id }).select('skill');
+  const knownSkillIds = new Set(records.map((record) => String(record.skill)));
+  if (!knownSkillIds.size) {
+    return user;
+  }
+
+  const steps = await getPublishedSteps(path._id);
+  let currentUser = user;
+
+  for (const step of steps) {
+    if (!stepMatchesKnownSkills(step, knownSkillIds)) {
+      break;
+    }
+    const result = await completeRoadmapStep(currentUser, path, step);
+    currentUser = await User.findById(currentUser._id);
+    if (result.alreadyCompleted) {
+      continue;
+    }
+  }
+
+  return currentUser;
+}
+
 async function buildProgressionSummary(user) {
   const totalXp = Number(user.xp) || 0;
   const empty = {
@@ -231,4 +274,6 @@ module.exports = {
   buildProgressionSummary,
   selectLearningPath,
   completeRoadmapStep,
+  creditOnboardingSkills,
+  stepMatchesKnownSkills,
 };

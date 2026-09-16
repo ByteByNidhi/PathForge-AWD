@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "seed": "node scripts/seed.js",
+    "report:skill-duplicates": "node scripts/reportSkillDuplicates.js",
     "test": "node --test --test-concurrency=1 tests/**/*.test.js"
   },
   "dependencies": {

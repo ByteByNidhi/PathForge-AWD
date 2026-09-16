@@ -123,6 +123,35 @@ function OrganizationOpportunityForm({ mode }) {
       intent,
     }
 
+    const next = {}
+    if (!form.title.trim()) next.title = 'Title is required'
+    if (!form.type) next.type = 'Type is required'
+    if (!form.description.trim()) next.description = 'Description is required'
+    if (form.deadline) {
+      const min = formMeta.deadlineMin
+      const max = formMeta.deadlineMax
+      if (min && form.deadline < min) {
+        next.deadline = 'The deadline must be today or later.'
+      } else if (max && form.deadline > max) {
+        next.deadline = 'Organization opportunity deadlines cannot be more than 1 year from today.'
+      }
+    }
+    if (form.applicationUrl.trim()) {
+      try {
+        const parsed = new URL(form.applicationUrl.trim())
+        if (!['http:', 'https:'].includes(parsed.protocol)) {
+          next.applicationUrl = 'The application URL must start with http or https.'
+        }
+      } catch {
+        next.applicationUrl = 'The application URL must start with http or https.'
+      }
+    }
+    if (Object.keys(next).length) {
+      setFieldErrors(next)
+      setSaving(false)
+      return
+    }
+
     try {
       if (isEdit) {
         await updateOrganizationOpportunity(id, payload)

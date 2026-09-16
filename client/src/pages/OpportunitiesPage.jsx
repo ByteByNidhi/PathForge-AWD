@@ -153,7 +153,7 @@ function OpportunitiesPage() {
         {!meta.hasUserSkills ? (
           <p className="opportunity-hint pf-muted">
             Skill matching becomes available after you{' '}
-            <Link to={PATHS.SKILLS}>add catalogue skills</Link>.
+            <Link to={PATHS.SKILLS}>add catalogue or custom skills</Link>.
           </p>
         ) : null}
 

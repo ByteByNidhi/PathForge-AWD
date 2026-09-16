@@ -36,7 +36,7 @@
 .app-sidebar nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
   flex: 1;
 }
 
@@ -44,8 +44,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 2.5rem;
-  padding: 0 var(--space-3);
+  min-height: 2.65rem;
+  padding: 0 var(--space-4);
   border-radius: var(--radius-md);
   color: var(--color-text-on-dark-muted);
 }
@@ -147,7 +147,7 @@
 }
 
 .app-content {
-  padding: var(--space-8);
+  padding: var(--space-10) var(--space-10) var(--space-16);
   max-width: var(--content-max);
   min-width: 0;
 }

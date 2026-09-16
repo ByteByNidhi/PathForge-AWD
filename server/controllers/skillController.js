@@ -6,6 +6,12 @@ const LearningPath = require('../models/LearningPath');
 const AppError = require('../utils/AppError');
 const asyncHandler = require('../utils/asyncHandler');
 const achievementService = require('../services/achievementService');
+const {
+  collectSkillNames,
+  resolveSkillIds,
+  findCanonicalSkillByName,
+  validateSkillName,
+} = require('../services/skillCatalogService');
 
 const listSkills = asyncHandler(async (_req, res) => {
   const skills = await Skill.find().sort({ name: 1 });
@@ -78,7 +84,40 @@ async function assignCatalogueSkills(userId, skillIds) {
 }
 
 const assignMySkills = asyncHandler(async (req, res) => {
-  const skillIds = req.body.skillIds || (req.body.skillId ? [req.body.skillId] : []);
+  const requestedIds = req.body.skillIds || (req.body.skillId ? [req.body.skillId] : []);
+  const skillNames = collectSkillNames(req.body);
+  const nameErrors = skillNames.map((name) => validateSkillName(name)).filter(Boolean);
+  if (nameErrors.length) {
+    throw new AppError(nameErrors[0], 400, [{ field: 'skillName', message: nameErrors[0] }]);
+  }
+
+  if (!requestedIds.length && skillNames.length) {
+    const alreadyOwned = [];
+    for (const name of skillNames) {
+      const existing = await findCanonicalSkillByName(name);
+      if (existing) {
+        const owned = await UserSkill.exists({ user: req.user.id, skill: existing._id });
+        if (owned) {
+          alreadyOwned.push(existing.name);
+        }
+      }
+    }
+    if (alreadyOwned.length === skillNames.length) {
+      throw new AppError('You already have this skill.', 400, [
+        { field: 'skillName', message: 'You already have this skill.' },
+      ]);
+    }
+  }
+
+  const skillIds = await resolveSkillIds({
+    skillIds: requestedIds,
+    skillNames,
+  });
+  if (!skillIds.length) {
+    throw new AppError('Enter a skill name', 400, [
+      { field: 'skillName', message: 'Enter a skill name' },
+    ]);
+  }
   const skills = await assignCatalogueSkills(req.user.id, skillIds);
   const user = await User.findById(req.user.id);
   await achievementService.checkAndUnlock(user);

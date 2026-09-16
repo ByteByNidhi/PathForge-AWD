@@ -64,6 +64,15 @@ function OrganizationProfilePage() {
     setError('')
     setMessage('')
     setFieldErrors({})
+    const next = {}
+    if (!form.name.trim()) next.name = 'Name is required'
+    if (!form.email.trim()) next.email = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) next.email = 'Enter a valid email address'
+    if (Object.keys(next).length) {
+      setFieldErrors(next)
+      setSaving(false)
+      return
+    }
     try {
       const data = await updateOrganizationProfile({
         name: form.name,
@@ -101,7 +110,7 @@ function OrganizationProfilePage() {
   const readOnly = !permissions.canUpdateProfile
 
   return (
-    <div>
+    <div className="org-page">
       <PageHeader
         eyebrow="Organization"
         title="Organization profile"
@@ -111,9 +120,9 @@ function OrganizationProfilePage() {
         <form className="profile-form" onSubmit={onSubmit}>
           {message ? <div className="pf-flash">{message}</div> : null}
           {error ? <div className="pf-form-alert">{error}</div> : null}
-          <Input id="name" name="name" label="Name" value={form.name} onChange={onChange} error={fieldErrors.name} required readOnly={readOnly} />
+          <Input id="name" name="name" label="Name" value={form.name} onChange={onChange} error={fieldErrors.name} readOnly={readOnly} />
           <Input id="slug" name="slug" label="Slug" value={form.slug} readOnly />
-          <Input id="email" name="email" type="email" label="Email" value={form.email} onChange={onChange} error={fieldErrors.email} required readOnly={readOnly} />
+          <Input id="email" name="email" type="email" label="Email" value={form.email} onChange={onChange} error={fieldErrors.email} readOnly={readOnly} />
           <Input id="phone" name="phone" label="Phone" value={form.phone} onChange={onChange} error={fieldErrors.phone} readOnly={readOnly} />
           <Input id="website" name="website" type="url" label="Website" value={form.website} onChange={onChange} error={fieldErrors.website} readOnly={readOnly} />
           <Textarea id="description" name="description" label="Description" value={form.description} onChange={onChange} error={fieldErrors.description} readOnly={readOnly} />

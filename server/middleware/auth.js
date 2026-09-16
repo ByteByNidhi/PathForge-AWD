@@ -41,6 +41,13 @@ function requireRoles(...roles) {
 
 const requireAdmin = requireRoles('admin');
 
+function requireNotOrganization(req, _res, next) {
+  if (req.user && req.user.role === 'organization') {
+    return next(new AppError('You do not have permission to perform this action', 403));
+  }
+  next();
+}
+
 function requireOnboardingComplete(req, _res, next) {
   if (req.user.role === 'student' && !req.user.onboardingCompleted) {
     return next(new AppError('Complete onboarding to continue', 403));
@@ -52,5 +59,6 @@ module.exports = {
   protect,
   requireRoles,
   requireAdmin,
+  requireNotOrganization,
   requireOnboardingComplete,
 };

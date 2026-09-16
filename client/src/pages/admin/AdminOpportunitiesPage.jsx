@@ -196,7 +196,7 @@ function AdminOpportunitiesPage() {
   }
 
   return (
-    <div>
+    <div className="admin-page">
       <PageHeader
         eyebrow="Admin"
         title="Opportunities"

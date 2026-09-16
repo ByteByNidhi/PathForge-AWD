@@ -11,7 +11,13 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { PATHS } from '../../routes/paths.js'
 import { getApiError, getFieldErrors } from '../../services/api.js'
 import { completeOnboarding, fetchOnboarding } from '../../services/onboardingService.js'
-import { fetchRelevantSkills } from '../../services/skillService.js'
+import { fetchRelevantSkills, fetchSkills } from '../../services/skillService.js'
+import {
+  findSkillByNormalizedName,
+  skillId,
+  skillNameKey,
+  validateSkillName,
+} from '../../utils/skillName.js'
 
 const STEPS = ['Career Path', 'Skills', 'Confirm']
 
@@ -27,9 +33,12 @@ function OnboardingPage() {
   const [requestedPath, setRequestedPath] = useState('')
   const [isBeginner, setIsBeginner] = useState(null)
   const [skills, setSkills] = useState([])
+  const [catalogue, setCatalogue] = useState([])
   const [selectedSkillIds, setSelectedSkillIds] = useState([])
   const [skillsStatus, setSkillsStatus] = useState('idle')
   const [fieldErrors, setFieldErrors] = useState({})
+  const [customSkillName, setCustomSkillName] = useState('')
+  const [customSkills, setCustomSkills] = useState([])
   const [submitting, setSubmitting] = useState(false)
 
   const load = async () => {
@@ -38,6 +47,12 @@ function OnboardingPage() {
     try {
       const data = await fetchOnboarding()
       setPaths(data.learningPaths || [])
+      try {
+        const catalog = await fetchSkills()
+        setCatalogue(catalog.skills || [])
+      } catch {
+        setCatalogue([])
+      }
       setStatus('success')
     } catch (err) {
       setError(getApiError(err, 'Unable to load onboarding'))
@@ -90,6 +105,34 @@ function OnboardingPage() {
     )
   }
 
+  const addCustomSkill = (event) => {
+    event.preventDefault()
+    const nameError = validateSkillName(customSkillName)
+    if (nameError) {
+      setFieldErrors({ skillName: nameError })
+      return
+    }
+
+    const match = findSkillByNormalizedName([...skills, ...catalogue], customSkillName)
+    if (match) {
+      const id = skillId(match)
+      setSelectedSkillIds((current) => (current.includes(id) ? current : [...current, id]))
+      setCustomSkills((current) =>
+        current.filter((item) => skillNameKey(item) !== skillNameKey(match.name))
+      )
+      setCustomSkillName('')
+      setFieldErrors({})
+      return
+    }
+
+    setCustomSkills((current) => {
+      const exists = current.some((item) => skillNameKey(item) === skillNameKey(customSkillName))
+      return exists ? current : [...current, customSkillName.trim()]
+    })
+    setCustomSkillName('')
+    setFieldErrors({})
+  }
+
   const canContinueFromPath = isOther ? requestedPath.trim().length >= 2 : Boolean(selectedPathId)
 
   const goNext = () => {
@@ -106,6 +149,13 @@ function OnboardingPage() {
       setFieldErrors({ isBeginner: 'Choose a starting point' })
       return
     }
+    if (step === 1 && isBeginner === false && !isOther && !selectedSkillIds.length && !customSkills.length) {
+      setFieldErrors({
+        skillIds:
+          "Select at least one skill, or choose “I'm a total beginner” if you are starting from the first step.",
+      })
+      return
+    }
     setStep((current) => Math.min(2, current + 1))
   }
 
@@ -119,6 +169,7 @@ function OnboardingPage() {
         requestedPath: isOther ? requestedPath.trim() : undefined,
         isBeginner: Boolean(isBeginner),
         skillIds: isBeginner ? [] : selectedSkillIds,
+        skillNames: isBeginner ? [] : customSkills,
       })
       setUser(data.user)
       navigate(PATHS.DASHBOARD, { replace: true })
@@ -143,7 +194,7 @@ function OnboardingPage() {
       <PageHeader
         eyebrow="Onboarding"
         title="Set your starting point"
-        description="Choose a career path, tell us about your skills, then confirm. Beginners can continue with none."
+        description="Three steps: career path, skills, confirm. Beginners can continue with none."
       />
 
       <div className="onboarding__steps">
@@ -238,6 +289,7 @@ function OnboardingPage() {
               onClick={() => {
                 setIsBeginner(true)
                 setSelectedSkillIds([])
+                setCustomSkills([])
               }}
             >
               <div>
@@ -246,32 +298,84 @@ function OnboardingPage() {
               </div>
             </button>
             {fieldErrors.isBeginner ? <p className="pf-field-error">{fieldErrors.isBeginner}</p> : null}
+            {fieldErrors.skillIds ? <p className="pf-field-error">{fieldErrors.skillIds}</p> : null}
 
-            {isBeginner === false && !isOther ? (
-              skillsStatus === 'loading' ? (
-                <LoadingState title="Loading skills" message="Fetching skills for this career path." />
-              ) : skills.length ? (
-                <div className="pf-chip-grid">
-                  {skills.map((skill) => (
-                    <button
-                      key={skill._id}
-                      type="button"
-                      className={`pf-chip ${selectedSkillIds.includes(skill._id) ? 'is-selected' : ''}`}
-                      onClick={() => toggleSkill(skill._id)}
-                    >
-                      {skill.name}
-                    </button>
-                  ))}
+            {isBeginner === false ? (
+              <>
+                {!isOther ? (
+                  skillsStatus === 'loading' ? (
+                    <LoadingState title="Loading skills" message="Fetching skills for this career path." />
+                  ) : skills.length ? (
+                    <div>
+                      <p className="pf-eyebrow">Path skills</p>
+                      <div className="pf-chip-grid" style={{ marginTop: '0.75rem' }}>
+                        {skills.map((skill) => (
+                          <button
+                            key={skill._id}
+                            type="button"
+                            className={`pf-chip ${selectedSkillIds.includes(skill._id) ? 'is-selected' : ''}`}
+                            onClick={() => toggleSkill(skill._id)}
+                          >
+                            {skill.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="pf-muted">No mapped skills for this path yet. You can still add a custom skill.</p>
+                  )
+                ) : (
+                  <p className="pf-muted">
+                    Other paths do not receive a generated skill list. Add a custom skill below, or manage catalogue skills after onboarding.
+                  </p>
+                )}
+
+                <form className="skill-manager__row" onSubmit={addCustomSkill}>
+                  <Input
+                    id="onboarding-custom-skill"
+                    label="Add a skill not listed"
+                    placeholder="e.g. Public speaking"
+                    value={customSkillName}
+                    onChange={(event) => setCustomSkillName(event.target.value)}
+                    error={fieldErrors.skillName}
+                  />
+                  <Button type="submit" variant="secondary">
+                    Add skill
+                  </Button>
+                </form>
+
+                <div>
+                  <p className="pf-eyebrow">Selected skills</p>
+                  <div className="skills-list" style={{ marginTop: '0.75rem' }}>
+                    {selectedSkillIds.map((id) => {
+                      const skill = skills.find((item) => item._id === id)
+                      return (
+                        <span key={id} className="skill-pill">
+                          {skill?.name || 'Skill'}
+                          <button type="button" onClick={() => toggleSkill(id)} aria-label={`Remove ${skill?.name}`}>
+                            ×
+                          </button>
+                        </span>
+                      )
+                    })}
+                    {customSkills.map((name) => (
+                      <span key={name} className="skill-pill">
+                        {name}
+                        <button
+                          type="button"
+                          onClick={() => setCustomSkills((current) => current.filter((item) => item !== name))}
+                          aria-label={`Remove ${name}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    {!selectedSkillIds.length && !customSkills.length ? (
+                      <p className="pf-muted">None selected yet. Experienced students need at least one skill to continue.</p>
+                    ) : null}
+                  </div>
                 </div>
-              ) : (
-                <p className="pf-muted">No mapped skills for this path yet. You can add skills later.</p>
-              )
-            ) : null}
-
-            {isBeginner === false && isOther ? (
-              <p className="pf-muted">
-                Other paths do not receive a generated skill list. You can manage catalogue skills after onboarding.
-              </p>
+              </>
             ) : null}
           </div>
         ) : null}
@@ -294,8 +398,23 @@ function OnboardingPage() {
             </p>
             <p>
               <strong>Skills selected: </strong>
-              {isBeginner ? 'None' : selectedSkillIds.length}
+              {isBeginner
+                ? 'None'
+                : `${selectedSkillIds.length} catalogue, ${customSkills.length} custom`}
             </p>
+            {!isBeginner && (selectedSkillIds.length || customSkills.length) ? (
+              <div className="skills-list">
+                {selectedSkillIds.map((id) => {
+                  const skill = skills.find((item) => item._id === id)
+                  return (
+                    <span key={id} className="skill-pill">{skill?.name || 'Skill'}</span>
+                  )
+                })}
+                {customSkills.map((name) => (
+                  <span key={name} className="skill-pill">{name}</span>
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : null}
 

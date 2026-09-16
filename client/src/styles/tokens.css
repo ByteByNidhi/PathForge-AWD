@@ -108,7 +108,7 @@
   --duration-slow: 350ms;
 
   /* Layout */
-  --sidebar-width: 260px;
-  --content-max: 1120px;
-  --header-height: 72px;
+  --sidebar-width: 272px;
+  --content-max: 1280px;
+  --header-height: 76px;
 }

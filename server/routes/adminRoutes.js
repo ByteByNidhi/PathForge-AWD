@@ -25,4 +25,21 @@ router.post('/organizations', adminController.createOrganization);
 router.get('/career-path-requests', adminController.listCareerPathRequests);
 router.post('/career-path-requests/review', adminController.reviewCareerPathRequests);
 
+router.get('/roadmaps', adminController.listRoadmaps);
+router.get('/roadmaps/:pathId', adminController.getRoadmap);
+router.post('/roadmaps/:pathId/generate', adminController.generateRoadmap);
+router.get('/roadmaps/:pathId/preview', adminController.previewRoadmap);
+router.post('/roadmaps/:pathId/publish', adminController.publishRoadmap);
+router.post('/roadmaps/:pathId/steps', adminController.createRoadmapStep);
+router.put('/roadmaps/:pathId/steps/:stepId', adminController.updateRoadmapStep);
+router.patch('/roadmaps/:pathId/steps/:stepId', adminController.updateRoadmapStep);
+router.delete('/roadmaps/:pathId/steps/:stepId', adminController.deleteRoadmapStep);
+
+router.get('/users', adminController.listUsers);
+router.get('/users/:id', adminController.getUser);
+
+router.get('/subscriptions', adminController.listSubscriptions);
+router.get('/subscriptions/:id', adminController.getSubscription);
+router.post('/subscriptions/:id/upgrade', adminController.upgradeSubscription);
+
 module.exports = router;

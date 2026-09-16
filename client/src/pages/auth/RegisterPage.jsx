@@ -10,6 +10,7 @@ import { PATHS } from '../../routes/paths.js'
 import { getApiError, getFieldErrors } from '../../services/api.js'
 
 const NAME_PATTERN = /^[A-Za-z]+(?: [A-Za-z]+)*$/
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function RegisterPage() {
   const { register } = useAuth()
@@ -34,6 +35,7 @@ function RegisterPage() {
     if (!name) next.name = 'Full name is required'
     else if (!NAME_PATTERN.test(name)) next.name = 'Full name may contain letters and spaces only'
     if (!form.email.trim()) next.email = 'Email is required'
+    else if (!EMAIL_PATTERN.test(form.email.trim())) next.email = 'Enter a valid email address'
     if (!form.password) next.password = 'Password is required'
     else if (form.password.length < 8) next.password = 'Password must be at least 8 characters'
     if (form.password !== form.passwordConfirmation) {

@@ -9,6 +9,7 @@ const achievementRoutes = require('./achievementRoutes');
 const opportunityRoutes = require('./opportunityRoutes');
 const organizationRoutes = require('./organizationRoutes');
 const adminRoutes = require('./adminRoutes');
+const aiStudioRoutes = require('./aiStudioRoutes');
 
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.use('/achievements', achievementRoutes);
 router.use('/opportunities', opportunityRoutes);
 router.use('/organization', organizationRoutes);
 router.use('/admin', adminRoutes);
+router.use('/ai-studio', aiStudioRoutes);
 
 module.exports = router;

@@ -79,7 +79,7 @@ function AdminOrganizationsPage() {
   }
 
   return (
-    <div>
+    <div className="admin-page">
       <PageHeader
         eyebrow="Admin"
         title="Organizations"

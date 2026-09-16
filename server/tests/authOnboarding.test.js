@@ -74,3 +74,78 @@ test('register, login, and onboarding still work', async () => {
   const health = await request(app).get('/api/health').expect(200);
   assert.equal(health.body.database, 'connected');
 });
+
+test('registration rejects numeric and symbol names and malformed emails', async () => {
+  await request(app)
+    .post('/api/auth/register')
+    .send({
+      name: 'Nidhi123',
+      email: 'valid@example.com',
+      password: 'password12',
+      passwordConfirmation: 'password12',
+    })
+    .expect(400);
+
+  await request(app)
+    .post('/api/auth/register')
+    .send({
+      name: 'Nidhi@',
+      email: 'valid2@example.com',
+      password: 'password12',
+      passwordConfirmation: 'password12',
+    })
+    .expect(400);
+
+  const ok = await request(app)
+    .post('/api/auth/register')
+    .send({
+      name: 'Nidhi Nair',
+      email: '  nidhi.nair@example.com  ',
+      password: 'password12',
+      passwordConfirmation: 'password12',
+    })
+    .expect(201);
+  assert.equal(ok.body.user.name, 'Nidhi Nair');
+  assert.equal(ok.body.user.email, 'nidhi.nair@example.com');
+  assert.equal(ok.body.user.password, undefined);
+
+  await request(app)
+    .post('/api/auth/register')
+    .send({
+      name: 'Nidhi',
+      email: 'test@',
+      password: 'password12',
+      passwordConfirmation: 'password12',
+    })
+    .expect(400);
+
+  await request(app)
+    .post('/api/auth/register')
+    .send({
+      name: 'Nidhi',
+      email: 'test.com',
+      password: 'password12',
+      passwordConfirmation: 'password12',
+    })
+    .expect(400);
+
+  await request(app)
+    .post('/api/auth/register')
+    .send({
+      name: 'Nidhi',
+      email: '@gmail.com',
+      password: 'password12',
+      passwordConfirmation: 'password12',
+    })
+    .expect(400);
+
+  await request(app)
+    .post('/api/auth/register')
+    .send({
+      name: 'Nidhi',
+      email: 'match@example.com',
+      password: 'password12',
+      passwordConfirmation: 'password99',
+    })
+    .expect(400);
+});

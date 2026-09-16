@@ -43,8 +43,7 @@ const roadmapStepSchema = new mongoose.Schema(
   { timestamps: true, collection: 'roadmapsteps' }
 );
 
-roadmapStepSchema.index({ pathId: 1, stepNo: 1 }, { unique: true });
-roadmapStepSchema.index({ pathId: 1, isPublished: 1, stepNo: 1, _id: 1 });
+roadmapStepSchema.index({ pathId: 1, isPublished: 1, stepNo: 1 }, { unique: true });
 
 roadmapStepSchema.statics.stepSort = function stepSort() {
   return STEP_SORT;

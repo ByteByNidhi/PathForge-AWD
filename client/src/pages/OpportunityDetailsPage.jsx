@@ -155,6 +155,7 @@ function OpportunityDetailsPage() {
           )}
           <Button
             variant="ghost"
+            className={opportunity.saved ? 'opportunity-card__save is-on' : 'opportunity-card__save'}
             onClick={() => toggleSave(opportunity)}
             disabled={saving}
             aria-pressed={Boolean(opportunity.saved)}

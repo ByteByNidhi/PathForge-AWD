@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const env = require('./env');
+const { ensureRoadmapIndexes } = require('./roadmapIndexes');
 
 async function connectDb() {
   if (!env.mongodbUri) {
@@ -9,6 +10,10 @@ async function connectDb() {
   mongoose.set('strictQuery', true);
 
   await mongoose.connect(env.mongodbUri);
+  const { dropped } = await ensureRoadmapIndexes();
+  if (dropped.length) {
+    console.log(`Dropped legacy roadmap index: ${dropped.join(', ')}`);
+  }
 
   console.log('MongoDB connected');
 }

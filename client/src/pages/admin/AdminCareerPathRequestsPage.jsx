@@ -60,7 +60,7 @@ function AdminCareerPathRequestsPage() {
   }
 
   return (
-    <div>
+    <div className="admin-page">
       <PageHeader
         eyebrow="Admin"
         title="Career path requests"

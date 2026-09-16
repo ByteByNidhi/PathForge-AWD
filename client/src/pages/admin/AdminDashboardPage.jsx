@@ -49,11 +49,11 @@ function AdminDashboardPage() {
   const stats = data.stats || {}
 
   return (
-    <div>
+    <div className="admin-page">
       <PageHeader
         eyebrow="Admin"
         title="Moderation"
-        description="Review pending opportunities, manage organizations, and mark career path requests as reviewed."
+        description="Review pending opportunities, manage organizations, roadmaps, users, and demonstration subscriptions."
       />
 
       <div className="org-stat-row">
@@ -76,6 +76,15 @@ function AdminDashboardPage() {
           </Link>
           <Link to={PATHS.ADMIN_CAREER_PATH_REQUESTS} className="pf-btn pf-btn-secondary">
             Career path requests
+          </Link>
+          <Link to={PATHS.ADMIN_ROADMAPS} className="pf-btn pf-btn-secondary">
+            Roadmaps
+          </Link>
+          <Link to={PATHS.ADMIN_USERS} className="pf-btn pf-btn-secondary">
+            Users
+          </Link>
+          <Link to={PATHS.ADMIN_SUBSCRIPTIONS} className="pf-btn pf-btn-secondary">
+            Subscriptions
           </Link>
         </div>
       </Card>

@@ -5,6 +5,7 @@ import {
   Briefcase,
   Building2,
   Compass,
+  CreditCard,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -45,8 +46,15 @@ const ADMIN_NAV_ITEMS = [
   { to: PATHS.ADMIN, label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: PATHS.ADMIN_OPPORTUNITIES, label: 'Opportunities', icon: Briefcase },
   { to: PATHS.ADMIN_ORGANIZATIONS, label: 'Organizations', icon: Building2 },
+  { to: PATHS.ADMIN_ROADMAPS, label: 'Roadmaps', icon: Compass },
+  { to: PATHS.ADMIN_USERS, label: 'Users', icon: Users },
   { to: PATHS.ADMIN_CAREER_PATH_REQUESTS, label: 'Career Path Requests', icon: Route },
+  { to: PATHS.ADMIN_SUBSCRIPTIONS, label: 'Subscriptions', icon: CreditCard },
 ]
+
+function isAdminOpportunitiesActive(pathname) {
+  return pathname === PATHS.ADMIN_OPPORTUNITIES || pathname.startsWith(`${PATHS.ADMIN_OPPORTUNITIES}/`)
+}
 
 function isOpportunityHubActive(pathname) {
   if (pathname === PATHS.SAVED) {
@@ -55,8 +63,16 @@ function isOpportunityHubActive(pathname) {
   return pathname === PATHS.OPPORTUNITIES || pathname.startsWith(`${PATHS.OPPORTUNITIES}/`)
 }
 
-function isAdminOpportunitiesActive(pathname) {
-  return pathname === PATHS.ADMIN_OPPORTUNITIES || pathname.startsWith(`${PATHS.ADMIN_OPPORTUNITIES}/`)
+function isAdminRoadmapsActive(pathname) {
+  return pathname === PATHS.ADMIN_ROADMAPS || pathname.startsWith(`${PATHS.ADMIN_ROADMAPS}/`)
+}
+
+function isAdminUsersActive(pathname) {
+  return pathname === PATHS.ADMIN_USERS || pathname.startsWith(`${PATHS.ADMIN_USERS}/`)
+}
+
+function isAdminSubscriptionsActive(pathname) {
+  return pathname === PATHS.ADMIN_SUBSCRIPTIONS || pathname.startsWith(`${PATHS.ADMIN_SUBSCRIPTIONS}/`)
 }
 
 function Sidebar({ open, onClose }) {
@@ -94,6 +110,15 @@ function Sidebar({ open, onClose }) {
               }
               if (adminPanel && item.to === PATHS.ADMIN_OPPORTUNITIES) {
                 active = isAdminOpportunitiesActive(location.pathname)
+              }
+              if (adminPanel && item.to === PATHS.ADMIN_ROADMAPS) {
+                active = isAdminRoadmapsActive(location.pathname)
+              }
+              if (adminPanel && item.to === PATHS.ADMIN_USERS) {
+                active = isAdminUsersActive(location.pathname)
+              }
+              if (adminPanel && item.to === PATHS.ADMIN_SUBSCRIPTIONS) {
+                active = isAdminSubscriptionsActive(location.pathname)
               }
               return `app-nav-link ${active ? 'is-active' : ''}`
             }}

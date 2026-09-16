@@ -115,6 +115,8 @@ async function seedAchievements() {
 }
 
 async function seedDatabase() {
+  const { ensureRoadmapIndexes } = require('../config/roadmapIndexes');
+  await ensureRoadmapIndexes();
   const csvPath = path.join(__dirname, '..', 'data', 'master-roadmaps.csv');
   const csvText = fs.readFileSync(csvPath, 'utf8');
   const rows = parseCsv(csvText);
