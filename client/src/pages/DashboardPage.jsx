@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import {
   Award,
   Briefcase,
@@ -28,6 +28,7 @@ const RECOMMENDED_LIMIT = 4
 
 function DashboardPage() {
   const { user, setUser } = useAuth()
+  const location = useLocation()
   const [status, setStatus] = useState('loading')
   const [error, setError] = useState('')
   const [profile, setProfile] = useState(null)
@@ -89,6 +90,10 @@ function DashboardPage() {
   const xpIntoLevel = progression?.xpIntoLevel ?? profile?.xpIntoLevel ?? 0
   const currentStep = progression?.currentStep
   const roadmapCompleted = Boolean(progression?.roadmapCompleted)
+  const pendingPathRequest = profile?.careerPathRequest
+  const showPathRequestNotice =
+    Boolean(location.state?.careerPathRequestSubmitted) ||
+    (Boolean(pendingPathRequest) && !progression?.learningPath)
 
   return (
     <div className="dashboard">
@@ -97,6 +102,31 @@ function DashboardPage() {
         title={`Hello, ${user?.name?.split(' ')[0] || 'there'}`}
         description="Your career state, current quest, and recommended opportunities from the live Opportunity Hub."
       />
+
+      {showPathRequestNotice ? (
+        <Card className="dashboard-request">
+          <p className="pf-eyebrow">Career path request</p>
+          <h2>Your career path request has been submitted.</h2>
+          <p style={{ marginTop: '0.75rem' }}>
+            We&apos;ll let you know when it becomes available.
+          </p>
+          <p className="pf-muted" style={{ marginTop: '0.75rem' }}>
+            This request is pending review, so that path is not available to start yet.
+            You can keep using PathForge in the meantime.
+          </p>
+          {pendingPathRequest?.requestedPath ? (
+            <p style={{ marginTop: '0.75rem' }}>
+              Requested path: <strong>{pendingPathRequest.requestedPath}</strong>
+              {' '}
+              <Badge tone="warning">{pendingPathRequest.status || 'pending'}</Badge>
+            </p>
+          ) : null}
+          <div className="org-actions" style={{ marginTop: '1.25rem' }}>
+            <Link to={PATHS.OPPORTUNITIES} className="pf-btn pf-btn-primary">Opportunity Hub</Link>
+            <Link to={PATHS.ROADMAP} className="pf-btn pf-btn-secondary">Roadmaps</Link>
+          </div>
+        </Card>
+      ) : null}
 
       <section className="dashboard-welcome">
         <Card className="dashboard-hero">

@@ -29,6 +29,7 @@ import AdminOpportunityFormPage from '../pages/admin/AdminOpportunityFormPage.js
 import AdminOrganizationsPage from '../pages/admin/AdminOrganizationsPage.jsx'
 import AdminCareerPathRequestsPage from '../pages/admin/AdminCareerPathRequestsPage.jsx'
 import AdminRoadmapsPage from '../pages/admin/AdminRoadmapsPage.jsx'
+import AdminRoadmapCreatePage from '../pages/admin/AdminRoadmapCreatePage.jsx'
 import AdminRoadmapDetailsPage from '../pages/admin/AdminRoadmapDetailsPage.jsx'
 import AdminRoadmapPreviewPage from '../pages/admin/AdminRoadmapPreviewPage.jsx'
 import AdminRoadmapStepFormPage from '../pages/admin/AdminRoadmapStepFormPage.jsx'
@@ -84,6 +85,7 @@ function AppRouter() {
               <Route path={PATHS.ADMIN_ORGANIZATIONS} element={<AdminOrganizationsPage />} />
               <Route path={PATHS.ADMIN_CAREER_PATH_REQUESTS} element={<AdminCareerPathRequestsPage />} />
               <Route path={PATHS.ADMIN_ROADMAPS} element={<AdminRoadmapsPage />} />
+              <Route path={PATHS.ADMIN_ROADMAP_NEW} element={<AdminRoadmapCreatePage />} />
               <Route path="/admin/roadmaps/:id/preview" element={<AdminRoadmapPreviewPage />} />
               <Route path="/admin/roadmaps/:id/steps/new" element={<AdminRoadmapStepFormPage mode="create" />} />
               <Route path="/admin/roadmaps/:id/steps/:stepId/edit" element={<AdminRoadmapStepFormPage mode="edit" />} />

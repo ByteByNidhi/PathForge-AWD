@@ -101,6 +101,7 @@ function AdminRoadmapPreviewPage() {
                   <th>Description</th>
                   <th>XP</th>
                   <th>Skills</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -111,6 +112,9 @@ function AdminRoadmapPreviewPage() {
                     <td>{step.description}</td>
                     <td>{step.xpReward}</td>
                     <td>{step.skills?.map((skill) => skill.name).join(', ')}</td>
+                    <td>
+                      <Link to={PATHS.adminRoadmapStepEdit(id, step.id)}>Edit</Link>
+                    </td>
                   </tr>
                 ))}
               </tbody>

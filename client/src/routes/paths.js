@@ -27,6 +27,7 @@ export const PATHS = {
   ADMIN_ORGANIZATIONS: '/admin/organizations',
   ADMIN_CAREER_PATH_REQUESTS: '/admin/career-path-requests',
   ADMIN_ROADMAPS: '/admin/roadmaps',
+  ADMIN_ROADMAP_NEW: '/admin/roadmaps/new',
   adminRoadmap: (id) => `/admin/roadmaps/${id}`,
   adminRoadmapPreview: (id) => `/admin/roadmaps/${id}/preview`,
   adminRoadmapStepNew: (id) => `/admin/roadmaps/${id}/steps/new`,

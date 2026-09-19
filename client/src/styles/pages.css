@@ -108,6 +108,10 @@
   padding: var(--space-8);
 }
 
+.dashboard-request {
+  margin-bottom: var(--space-5);
+}
+
 .dashboard-recommend__card {
   min-height: 10.5rem;
 }
@@ -312,7 +316,8 @@
   opacity: 0.72;
 }
 
-.roadmap-step.is-current {
+.roadmap-step.is-current,
+.roadmap-step.is-available {
   border-color: var(--color-brand-emerald);
 }
 
@@ -331,7 +336,8 @@
   color: var(--color-brand-forest);
 }
 
-.roadmap-step.is-current .roadmap-step__marker {
+.roadmap-step.is-current .roadmap-step__marker,
+.roadmap-step.is-available .roadmap-step__marker {
   background: var(--color-brand-forest);
   color: var(--color-text-on-dark);
 }

@@ -6,6 +6,7 @@ import ErrorState from '../../components/ui/ErrorState.jsx'
 import Input from '../../components/ui/Input.jsx'
 import LoadingState from '../../components/ui/LoadingState.jsx'
 import PageHeader from '../../components/ui/PageHeader.jsx'
+import Textarea from '../../components/ui/Textarea.jsx'
 import { PATHS } from '../../routes/paths.js'
 import { getApiError, getFieldErrors } from '../../services/api.js'
 import {
@@ -13,6 +14,8 @@ import {
   fetchAdminRoadmap,
   updateAdminRoadmapStep,
 } from '../../services/adminService.js'
+import { fetchSkills } from '../../services/skillService.js'
+import { skillId } from '../../utils/skillName.js'
 
 function AdminRoadmapStepFormPage({ mode }) {
   const { id, stepId } = useParams()
@@ -22,11 +25,14 @@ function AdminRoadmapStepFormPage({ mode }) {
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
   const [pathName, setPathName] = useState('')
+  const [catalogue, setCatalogue] = useState([])
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     stepNo: 1,
     title: '',
+    description: '',
     xpReward: 10,
+    skillIds: [],
   })
 
   useEffect(() => {
@@ -34,8 +40,12 @@ function AdminRoadmapStepFormPage({ mode }) {
       setStatus('loading')
       setError('')
       try {
-        const data = await fetchAdminRoadmap(id)
+        const [data, skillsData] = await Promise.all([
+          fetchAdminRoadmap(id),
+          fetchSkills().catch(() => ({ skills: [] })),
+        ])
         setPathName(data.learningPath?.pathName || '')
+        setCatalogue(skillsData.skills || [])
         if (isEdit) {
           const step = (data.steps || []).concat(data.draftSteps || []).find((item) => item.id === stepId)
           if (!step) {
@@ -44,14 +54,19 @@ function AdminRoadmapStepFormPage({ mode }) {
           setForm({
             stepNo: step.stepNo,
             title: step.title,
+            description: step.description || '',
             xpReward: step.xpReward,
+            skillIds: (step.skills || []).map((skill) => skill.id || skill._id),
           })
         } else {
-          const maxNo = (data.steps || []).reduce((max, step) => Math.max(max, Number(step.stepNo) || 0), 0)
+          const all = (data.steps || []).concat(data.draftSteps || [])
+          const maxNo = all.reduce((max, step) => Math.max(max, Number(step.stepNo) || 0), 0)
           setForm({
             stepNo: maxNo + 1,
             title: '',
+            description: '',
             xpReward: 10,
+            skillIds: [],
           })
         }
         setStatus('success')
@@ -68,6 +83,15 @@ function AdminRoadmapStepFormPage({ mode }) {
     setForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
+  const toggleSkill = (skillKey) => {
+    setForm((current) => ({
+      ...current,
+      skillIds: current.skillIds.includes(skillKey)
+        ? current.skillIds.filter((item) => item !== skillKey)
+        : [...current.skillIds, skillKey],
+    }))
+  }
+
   const onSubmit = async (event) => {
     event.preventDefault()
     setSaving(true)
@@ -76,7 +100,9 @@ function AdminRoadmapStepFormPage({ mode }) {
     const payload = {
       stepNo: Number(form.stepNo),
       title: form.title,
+      description: form.description,
       xpReward: Number(form.xpReward),
+      skillIds: form.skillIds,
     }
     try {
       if (isEdit) {
@@ -132,6 +158,14 @@ function AdminRoadmapStepFormPage({ mode }) {
             error={fieldErrors.title}
             required
           />
+          <Textarea
+            id="step-description"
+            label="Description"
+            rows="3"
+            value={form.description}
+            onChange={onChange('description')}
+            error={fieldErrors.description}
+          />
           <Input
             id="step-xp"
             label="XP reward"
@@ -142,6 +176,26 @@ function AdminRoadmapStepFormPage({ mode }) {
             error={fieldErrors.xpReward}
             required
           />
+          <div>
+            <p className="pf-eyebrow">Skills</p>
+            <p className="pf-muted">Assign catalogue skills used for student matching. Leave empty if this step has no skill requirement.</p>
+            <div className="pf-chip-grid" style={{ marginTop: '0.75rem' }}>
+              {catalogue.map((skill) => {
+                const key = skillId(skill)
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`pf-chip ${form.skillIds.includes(key) ? 'is-selected' : ''}`}
+                    onClick={() => toggleSkill(key)}
+                  >
+                    {skill.name}
+                  </button>
+                )
+              })}
+            </div>
+            {fieldErrors.skillIds ? <p className="pf-field-error">{fieldErrors.skillIds}</p> : null}
+          </div>
           <Button type="submit" disabled={saving}>
             {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Add step'}
           </Button>

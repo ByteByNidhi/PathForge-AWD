@@ -126,6 +126,14 @@ const listRoadmaps = asyncHandler(async (_req, res) => {
   });
 });
 
+const createRoadmap = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.create(req.body);
+  res.status(201).json({
+    success: true,
+    ...payload,
+  });
+});
+
 const getRoadmap = asyncHandler(async (req, res) => {
   const payload = await adminRoadmapService.show(req.params.pathId);
   res.status(200).json({
@@ -170,6 +178,14 @@ const createRoadmapStep = asyncHandler(async (req, res) => {
 
 const updateRoadmapStep = asyncHandler(async (req, res) => {
   const payload = await adminRoadmapService.updateStep(req.params.pathId, req.params.stepId, req.body);
+  res.status(200).json({
+    success: true,
+    ...payload,
+  });
+});
+
+const moveRoadmapStep = asyncHandler(async (req, res) => {
+  const payload = await adminRoadmapService.moveStep(req.params.pathId, req.params.stepId, req.body);
   res.status(200).json({
     success: true,
     ...payload,
@@ -249,12 +265,14 @@ module.exports = {
   listCareerPathRequests,
   reviewCareerPathRequests,
   listRoadmaps,
+  createRoadmap,
   getRoadmap,
   generateRoadmap,
   previewRoadmap,
   publishRoadmap,
   createRoadmapStep,
   updateRoadmapStep,
+  moveRoadmapStep,
   deleteRoadmapStep,
   listUsers,
   getUser,

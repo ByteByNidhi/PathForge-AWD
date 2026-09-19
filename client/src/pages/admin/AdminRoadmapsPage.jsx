@@ -45,7 +45,12 @@ function AdminRoadmapsPage() {
       <PageHeader
         eyebrow="Admin"
         title="Roadmaps"
-        description="Open a path to view curated steps or generate an AI draft. Users only see published steps."
+        description="Create a new career path, curate or generate a draft, then publish it. Students only see published paths and published steps."
+        actions={
+          <Link to={PATHS.ADMIN_ROADMAP_NEW} className="pf-btn pf-btn-primary">
+            Create New Path
+          </Link>
+        }
       />
 
       <Card>
@@ -57,6 +62,7 @@ function AdminRoadmapsPage() {
               <thead>
                 <tr>
                   <th>Path</th>
+                  <th>Status</th>
                   <th>Source</th>
                   <th>Published steps</th>
                   <th>AI draft</th>
@@ -69,6 +75,11 @@ function AdminRoadmapsPage() {
                     <td>
                       <strong>{path.pathName}</strong>
                       {path.description ? <div className="pf-muted">{path.description}</div> : null}
+                    </td>
+                    <td>
+                      <Badge tone={path.isPublished === false ? 'warning' : 'success'}>
+                        {path.isPublished === false ? 'Draft' : 'Published'}
+                      </Badge>
                     </td>
                     <td>
                       <Badge>{path.isAiGenerated ? 'AI-generated' : 'Curated'}</Badge>

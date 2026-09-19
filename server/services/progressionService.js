@@ -54,14 +54,55 @@ async function availableRoadmapStep(user, path) {
   return steps.find((step) => !completedIds.has(String(step._id))) || null;
 }
 
+async function knownSkillIdSet(userId) {
+  const records = await UserSkill.find({ user: userId }).select('skill');
+  return new Set(records.map((record) => String(record.skill)));
+}
+
+async function skillUnlockedPublishedStepIds(user, path, completedIds) {
+  const unlocked = new Set();
+  if (!user || !path) {
+    return unlocked;
+  }
+
+  const knownSkillIds = await knownSkillIdSet(user._id);
+  if (!knownSkillIds.size) {
+    return unlocked;
+  }
+
+  const steps = await getPublishedSteps(path._id);
+  for (const step of steps) {
+    const id = String(step._id);
+    if (completedIds.has(id)) {
+      continue;
+    }
+    if (stepMatchesKnownSkills(step, knownSkillIds)) {
+      unlocked.add(id);
+    }
+  }
+
+  return unlocked;
+}
+
 async function canCompleteRoadmapStep(user, step) {
-  if (!user || !step || !idsEqual(user.learningPath, step.pathId)) {
+  if (!user || !step || !idsEqual(user.learningPath, step.pathId) || step.isPublished !== true) {
     return false;
   }
 
   const path = await LearningPath.findById(step.pathId);
-  const available = await availableRoadmapStep(user, path);
-  return Boolean(available) && idsEqual(available._id, step._id);
+  const sequential = await availableRoadmapStep(user, path);
+  if (sequential && idsEqual(sequential._id, step._id)) {
+    return true;
+  }
+
+  const completedIds = await completedPublishedStepIds(user._id, path._id);
+  if (completedIds.has(String(step._id))) {
+    return true;
+  }
+
+  const populated = await RoadmapStep.findById(step._id).populate('skills');
+  const knownSkillIds = await knownSkillIdSet(user._id);
+  return stepMatchesKnownSkills(populated, knownSkillIds);
 }
 
 function userProgressPayload(user, stats) {
@@ -87,8 +128,15 @@ async function buildRoadmapPayload(user, path) {
   const totalPublishedSteps = steps.length;
   const progressPercent = roadmapProgressPercent(completedSteps, totalPublishedSteps);
 
+  const skillUnlockedIds = isSelected
+    ? await skillUnlockedPublishedStepIds(user, path, completedIds)
+    : new Set();
   const serializedSteps = steps.map((step) =>
-    serializeRoadmapStep(step, { completedIds, currentStepId })
+    serializeRoadmapStep(step, {
+      completedIds,
+      currentStepId,
+      unlockedIds: skillUnlockedIds,
+    })
   );
 
   const stats = {
@@ -269,6 +317,7 @@ module.exports = {
   getAllSteps,
   completedPublishedStepIds,
   availableRoadmapStep,
+  skillUnlockedPublishedStepIds,
   canCompleteRoadmapStep,
   buildRoadmapPayload,
   buildProgressionSummary,

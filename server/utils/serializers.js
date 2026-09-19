@@ -48,10 +48,12 @@ function serializeLearningPath(path, options = {}) {
   };
 }
 
-function serializeRoadmapStep(step, { completedIds, currentStepId } = {}) {
+function serializeRoadmapStep(step, { completedIds, currentStepId, unlockedIds } = {}) {
   const id = String(step._id || step.id);
   const completed = Boolean(completedIds && completedIds.has(id));
   const current = Boolean(currentStepId) && id === String(currentStepId) && !completed;
+  const skillUnlocked = Boolean(unlockedIds && unlockedIds.has(id)) && !completed && !current;
+  const available = current || skillUnlocked;
   const skills = Array.isArray(step.skills)
     ? step.skills
         .filter((item) => item && item.name)
@@ -63,6 +65,8 @@ function serializeRoadmapStep(step, { completedIds, currentStepId } = {}) {
     state = 'completed';
   } else if (current) {
     state = 'current';
+  } else if (skillUnlocked) {
+    state = 'available';
   }
 
   return {
@@ -77,7 +81,8 @@ function serializeRoadmapStep(step, { completedIds, currentStepId } = {}) {
     state,
     completed,
     current,
-    locked: !completed && !current,
+    available,
+    locked: !completed && !available,
   };
 }
 

@@ -172,7 +172,10 @@ function OnboardingPage() {
         skillNames: isBeginner ? [] : customSkills,
       })
       setUser(data.user)
-      navigate(PATHS.DASHBOARD, { replace: true })
+      navigate(PATHS.DASHBOARD, {
+        replace: true,
+        state: isOther ? { careerPathRequestSubmitted: true } : undefined,
+      })
     } catch (err) {
       setFieldErrors(getFieldErrors(err))
       setError(getApiError(err, 'Unable to complete onboarding'))

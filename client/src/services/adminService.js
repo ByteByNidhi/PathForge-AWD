@@ -70,6 +70,11 @@ export async function fetchAdminRoadmaps() {
   return data
 }
 
+export async function createAdminRoadmap(payload) {
+  const { data } = await api.post('/admin/roadmaps', payload)
+  return data
+}
+
 export async function fetchAdminRoadmap(id) {
   const { data } = await api.get(`/admin/roadmaps/${id}`)
   return data
@@ -97,6 +102,11 @@ export async function createAdminRoadmapStep(pathId, payload) {
 
 export async function updateAdminRoadmapStep(pathId, stepId, payload) {
   const { data } = await api.put(`/admin/roadmaps/${pathId}/steps/${stepId}`, payload)
+  return data
+}
+
+export async function moveAdminRoadmapStep(pathId, stepId, payload) {
+  const { data } = await api.post(`/admin/roadmaps/${pathId}/steps/${stepId}/move`, payload)
   return data
 }
 

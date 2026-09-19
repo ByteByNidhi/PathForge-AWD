@@ -26,11 +26,13 @@ router.get('/career-path-requests', adminController.listCareerPathRequests);
 router.post('/career-path-requests/review', adminController.reviewCareerPathRequests);
 
 router.get('/roadmaps', adminController.listRoadmaps);
+router.post('/roadmaps', adminController.createRoadmap);
 router.get('/roadmaps/:pathId', adminController.getRoadmap);
 router.post('/roadmaps/:pathId/generate', adminController.generateRoadmap);
 router.get('/roadmaps/:pathId/preview', adminController.previewRoadmap);
 router.post('/roadmaps/:pathId/publish', adminController.publishRoadmap);
 router.post('/roadmaps/:pathId/steps', adminController.createRoadmapStep);
+router.post('/roadmaps/:pathId/steps/:stepId/move', adminController.moveRoadmapStep);
 router.put('/roadmaps/:pathId/steps/:stepId', adminController.updateRoadmapStep);
 router.patch('/roadmaps/:pathId/steps/:stepId', adminController.updateRoadmapStep);
 router.delete('/roadmaps/:pathId/steps/:stepId', adminController.deleteRoadmapStep);

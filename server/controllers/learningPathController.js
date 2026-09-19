@@ -6,12 +6,17 @@ const { isValidId } = require('../utils/ids');
 const { serializeLearningPath } = require('../utils/serializers');
 const progressionService = require('../services/progressionService');
 
-async function findLearningPathOr404(id) {
+async function findLearningPathOr404(id, { publishedOnly = false } = {}) {
   if (!isValidId(id)) {
     throw new AppError('Learning path not found', 404);
   }
 
-  const path = await LearningPath.findById(id).populate('skills');
+  const query = { _id: id };
+  if (publishedOnly) {
+    query.isPublished = true;
+  }
+
+  const path = await LearningPath.findOne(query).populate('skills');
   if (!path) {
     throw new AppError('Learning path not found', 404);
   }
@@ -19,7 +24,7 @@ async function findLearningPathOr404(id) {
 }
 
 const listLearningPaths = asyncHandler(async (req, res) => {
-  const paths = await LearningPath.find()
+  const paths = await LearningPath.find({ isPublished: true })
     .select(
       'title pathName description icon slug isPublished skills roadmapMeta roadmapSource'
     )
@@ -34,7 +39,7 @@ const listLearningPaths = asyncHandler(async (req, res) => {
 });
 
 const getLearningPath = asyncHandler(async (req, res) => {
-  const path = await findLearningPathOr404(req.params.id);
+  const path = await findLearningPathOr404(req.params.id, { publishedOnly: true });
 
   res.status(200).json({
     success: true,
@@ -43,13 +48,13 @@ const getLearningPath = asyncHandler(async (req, res) => {
 });
 
 const getLearningPathSkills = asyncHandler(async (req, res) => {
-  const path = await findLearningPathOr404(req.params.id);
+  const path = await findLearningPathOr404(req.params.id, { publishedOnly: true });
 
   res.status(200).json({ success: true, skills: path.skills });
 });
 
 const selectLearningPath = asyncHandler(async (req, res) => {
-  const path = await findLearningPathOr404(req.params.id);
+  const path = await findLearningPathOr404(req.params.id, { publishedOnly: true });
   const user = await progressionService.selectLearningPath(req.user, path);
 
   res.status(200).json({
@@ -61,7 +66,7 @@ const selectLearningPath = asyncHandler(async (req, res) => {
 });
 
 const getLearningPathRoadmap = asyncHandler(async (req, res) => {
-  const path = await findLearningPathOr404(req.params.id);
+  const path = await findLearningPathOr404(req.params.id, { publishedOnly: true });
   const payload = await progressionService.buildRoadmapPayload(req.user, path);
 
   res.status(200).json({
@@ -77,7 +82,7 @@ const completeLearningPathStep = asyncHandler(async (req, res) => {
     throw new AppError('Roadmap step not found', 404);
   }
 
-  const path = await LearningPath.findById(pathId);
+  const path = await LearningPath.findOne({ _id: pathId, isPublished: true });
   if (!path) {
     throw new AppError('Learning path not found', 404);
   }

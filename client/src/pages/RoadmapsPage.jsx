@@ -1,4 +1,4 @@
-import { Check, Compass, Lock } from 'lucide-react'
+import { Check, Lock, Unlock } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import Badge from '../components/ui/Badge.jsx'
 import Button from '../components/ui/Button.jsx'
@@ -22,9 +22,13 @@ function pathId(path) {
 }
 
 function stepStateLabel(step) {
-  if (step.state === 'completed') return 'Completed'
-  if (step.state === 'current') return 'Current'
+  if (step.state === 'completed' || step.completed) return 'Completed'
+  if (step.available || step.state === 'current' || step.state === 'available') return 'Available'
   return 'Locked'
+}
+
+function canMarkComplete(step) {
+  return Boolean(step.available || step.state === 'current' || step.state === 'available') && !step.completed
 }
 
 function RoadmapsPage() {
@@ -90,7 +94,7 @@ function RoadmapsPage() {
   }
 
   const onComplete = async (step) => {
-    if (!roadmap?.learningPath || step.state !== 'current') {
+    if (!roadmap?.learningPath || !canMarkComplete(step)) {
       return
     }
     setSaving(true)
@@ -117,7 +121,7 @@ function RoadmapsPage() {
   }
 
   const steps = roadmap?.steps || []
-  const currentStep = steps.find((step) => step.state === 'current')
+  const currentStep = steps.find((step) => step.state === 'current') || steps.find((step) => step.state === 'available')
   const roadmapCompleted =
     Boolean(roadmap) &&
     roadmap.totalPublishedSteps > 0 &&
@@ -204,7 +208,7 @@ function RoadmapsPage() {
                   <Card className={`roadmap-step is-${step.state}`}>
                     <div className="roadmap-step__marker" aria-hidden="true">
                       {step.state === 'completed' ? <Check size={16} /> : null}
-                      {step.state === 'current' ? <Compass size={16} /> : null}
+                      {step.state === 'current' || step.state === 'available' ? <Unlock size={16} /> : null}
                       {step.state === 'locked' ? <Lock size={16} /> : null}
                     </div>
                     <div className="roadmap-step__body">
@@ -214,7 +218,7 @@ function RoadmapsPage() {
                           tone={
                             step.state === 'completed'
                               ? 'success'
-                              : step.state === 'current'
+                              : step.state === 'current' || step.state === 'available'
                                 ? 'info'
                                 : 'neutral'
                           }
@@ -232,7 +236,7 @@ function RoadmapsPage() {
                           ))}
                         </div>
                       ) : null}
-                      {step.state === 'current' ? (
+                      {canMarkComplete(step) ? (
                         <Button
                           onClick={() => onComplete(step)}
                           disabled={saving}

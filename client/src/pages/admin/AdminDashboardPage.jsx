@@ -80,6 +80,9 @@ function AdminDashboardPage() {
           <Link to={PATHS.ADMIN_ROADMAPS} className="pf-btn pf-btn-secondary">
             Roadmaps
           </Link>
+          <Link to={PATHS.ADMIN_ROADMAP_NEW} className="pf-btn pf-btn-secondary">
+            Create New Path
+          </Link>
           <Link to={PATHS.ADMIN_USERS} className="pf-btn pf-btn-secondary">
             Users
           </Link>

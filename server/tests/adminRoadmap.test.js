@@ -12,6 +12,7 @@ const {
   clearTestDb,
   createStudent,
   createAdmin,
+  createOrganizationOwner,
   authed,
 } = require('./helpers');
 
@@ -332,3 +333,133 @@ test('admin users and demo subscriptions are admin-only', async () => {
   await authed('get', '/api/admin/subscriptions/missing', admin.token).expect(404);
   await authed('get', '/api/admin/subscriptions', student.token).expect(403);
 });
+
+test('admin can create a draft path and non-admins cannot', async () => {
+  const admin = await createAdmin();
+  const student = await createStudent();
+  const org = await createOrganizationOwner();
+
+  const created = await authed('post', '/api/admin/roadmaps', admin.token)
+    .send({
+      pathName: '  Data Analytics  ',
+      description: 'A new analytics career path',
+      icon: '📊',
+    })
+    .expect(201);
+
+  assert.equal(created.body.learningPath.pathName, 'Data Analytics');
+  assert.equal(created.body.learningPath.isPublished, false);
+  const pathId = created.body.learningPath.id;
+  const stored = await LearningPath.findById(pathId);
+  assert.equal(stored.isPublished, false);
+
+  await authed('post', '/api/admin/roadmaps', admin.token)
+    .send({ pathName: 'data analytics' })
+    .expect(422);
+
+  await authed('post', '/api/admin/roadmaps', student.token)
+    .send({ pathName: 'Student Path' })
+    .expect(403);
+  await authed('post', '/api/admin/roadmaps', org.token)
+    .send({ pathName: 'Org Path' })
+    .expect(403);
+  await authed('post', `/api/admin/roadmaps/${pathId}/generate`, org.token).expect(403);
+  await authed('post', `/api/admin/roadmaps/${pathId}/publish`, org.token).expect(403);
+
+  const hidden = await authed('get', '/api/learning-paths', student.token).expect(200);
+  assert.equal(hidden.body.learningPaths.some((path) => path.pathName === 'Data Analytics'), false);
+  await authed('get', `/api/learning-paths/${pathId}`, student.token).expect(404);
+  await authed('post', `/api/learning-paths/${pathId}/select`, student.token).expect(404);
+});
+
+test('admin can curate unpublished steps then publish the path for students', async () => {
+  const admin = await createAdmin();
+  const student = await createStudent();
+  const html = await Skill.create({ name: 'HTML', slug: 'html-admin' });
+
+  const created = await authed('post', '/api/admin/roadmaps', admin.token)
+    .send({ pathName: 'Manual Career Path', description: 'Curated by admin' })
+    .expect(201);
+  const pathId = created.body.learningPath.id;
+
+  const first = await authed('post', `/api/admin/roadmaps/${pathId}/steps`, admin.token)
+    .send({ stepNo: 1, title: 'Foundations', xpReward: 20, description: 'Start here', skillIds: [html.id] })
+    .expect(201);
+  assert.equal(first.body.step.isPublished, false);
+  assert.equal(first.body.step.skills[0].name, 'HTML');
+  const firstId = first.body.step.id;
+
+  const second = await authed('post', `/api/admin/roadmaps/${pathId}/steps`, admin.token)
+    .send({ stepNo: 2, title: 'Practice', xpReward: 25 })
+    .expect(201);
+  const secondId = second.body.step.id;
+
+  await authed('put', `/api/admin/roadmaps/${pathId}/steps/${firstId}`, admin.token)
+    .send({ stepNo: 1, title: 'Core Foundations', xpReward: 30, skillIds: [html.id] })
+    .expect(200);
+
+  await authed('post', `/api/admin/roadmaps/${pathId}/steps/${secondId}/move`, admin.token)
+    .send({ direction: 'up' })
+    .expect(200);
+
+  const afterMove = await authed('get', `/api/admin/roadmaps/${pathId}`, admin.token).expect(200);
+  assert.deepEqual(
+    afterMove.body.draftSteps.map((step) => step.title),
+    ['Practice', 'Core Foundations']
+  );
+
+  await authed('delete', `/api/admin/roadmaps/${pathId}/steps/${secondId}`, admin.token).expect(200);
+  assert.equal(await RoadmapStep.countDocuments({ _id: secondId }), 0);
+
+  const unpublishedStudent = await authed('get', '/api/learning-paths', student.token).expect(200);
+  assert.equal(
+    unpublishedStudent.body.learningPaths.some((path) => path.pathName === 'Manual Career Path'),
+    false
+  );
+
+  await authed('post', `/api/admin/roadmaps/${pathId}/publish`, admin.token).expect(200);
+  const published = await LearningPath.findById(pathId);
+  assert.equal(published.isPublished, true);
+  assert.equal(await RoadmapStep.countDocuments({ pathId, isPublished: true }), 1);
+  assert.equal(await RoadmapStep.countDocuments({ pathId, isPublished: false }), 0);
+
+  const visible = await authed('get', '/api/learning-paths', student.token).expect(200);
+  assert.equal(visible.body.learningPaths.some((path) => path.pathName === 'Manual Career Path'), true);
+
+  await authed('post', `/api/learning-paths/${pathId}/select`, student.token).expect(200);
+  const roadmap = await authed('get', `/api/learning-paths/${pathId}/roadmap`, student.token).expect(200);
+  assert.equal(roadmap.body.steps[0].title, 'Core Foundations');
+  assert.equal(roadmap.body.steps[0].state, 'current');
+});
+
+test('AI generation on a new path stays unpublished until admin publishes', async () => {
+  fakeGeminiJson(validPayload(['HTML', 'Git']));
+  const admin = await createAdmin();
+  const student = await createStudent();
+  await Skill.create({ name: 'HTML', slug: 'html-new' });
+  await Skill.create({ name: 'Git', slug: 'git-new' });
+
+  const created = await authed('post', '/api/admin/roadmaps', admin.token)
+    .send({ pathName: 'AI Draft Path', description: 'Generated later' })
+    .expect(201);
+  const pathId = created.body.learningPath.id;
+
+  await authed('post', `/api/admin/roadmaps/${pathId}/generate`, admin.token).expect(200);
+  const afterGenerate = await LearningPath.findById(pathId);
+  assert.equal(afterGenerate.isPublished, false);
+  assert.equal(afterGenerate.roadmapSource, LearningPath.SOURCE_CURATED);
+  assert.equal(await RoadmapStep.countDocuments({ pathId, isPublished: false }), 8);
+  assert.equal(await RoadmapStep.countDocuments({ pathId, isPublished: true }), 0);
+
+  const hidden = await authed('get', '/api/learning-paths', student.token).expect(200);
+  assert.equal(hidden.body.learningPaths.some((path) => path.pathName === 'AI Draft Path'), false);
+
+  await authed('post', `/api/admin/roadmaps/${pathId}/publish`, admin.token).expect(200);
+  const live = await LearningPath.findById(pathId);
+  assert.equal(live.isPublished, true);
+  assert.equal(live.roadmapSource, LearningPath.SOURCE_AI);
+
+  const visible = await authed('get', '/api/learning-paths', student.token).expect(200);
+  assert.equal(visible.body.learningPaths.some((path) => path.pathName === 'AI Draft Path'), true);
+});
+
